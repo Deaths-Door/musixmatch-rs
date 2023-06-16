@@ -1,0 +1,2 @@
+# musixmatch-rs
+ This repository provides access to the MusixMatch API, which is a comprehensive service for retrieving music metadata, lyrics, and album art. It offers a wide range of functionalities that can be leveraged to build music applications requiring access to this data. By utilizing this Rust implementation, developers can seamlessly integrate MusixMatch API capabilities into their Rust projects, enabling the development of powerful and feature-rich music applications.
