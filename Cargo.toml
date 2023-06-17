@@ -1,0 +1,16 @@
+[package]
+name = "musixmatch-rs"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+
+#For utils library
+reqwest = "0.11"
+async-trait = "0.1.68"
+serde_json = "1.0"
+
+#For this library
+serde = { version = "1.0", features = ["derive"] }
