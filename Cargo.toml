@@ -3,9 +3,12 @@ name = "musixmatch"
 version = "0.1.0"
 edition = "2021"
 
-[dependencies]
-api-request-utils-rs = { version = "0.1.6-fix1", features = ["export"] }
-default-args = "1.0.0"
-
 [lib]
 path = "src/lib/mod.rs"
+
+[dependencies]
+api-request-utils-rs = { version = "0.1.7", features = ["export"] }
+default-args = "1.0.0"
+
+[dev-dependencies]
+tokio = { version = "1.29.1", features = ["full"] }
