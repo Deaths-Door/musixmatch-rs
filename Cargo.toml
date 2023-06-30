@@ -1,16 +1,11 @@
 [package]
-name = "musixmatch-rs"
+name = "musixmatch"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
+api-request-utils-rs = { version = "0.1.6-fix1", features = ["export"] }
+default-args = "1.0.0"
 
-#For utils library
-reqwest = "0.11"
-async-trait = "0.1.68"
-serde_json = "1.0"
-
-#For this library
-serde = { version = "1.0", features = ["derive"] }
+[lib]
+path = "src/lib/mod.rs"
