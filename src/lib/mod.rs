@@ -1,5 +1,7 @@
 mod musicabgleich;
-mod r#struct;
+mod structs;
+mod enums;
 
 pub use self::musicabgleich::*;
-pub use self::r#struct::*;
+pub use self::structs::*;
+pub use self::enums::*;

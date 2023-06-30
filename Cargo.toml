@@ -9,6 +9,7 @@ path = "src/lib/mod.rs"
 [dependencies]
 api-request-utils-rs = { version = "0.1.7", features = ["export"] }
 default-args = "1.0.0"
+strum = { version = "0.25", features = ["derive"] }
 
 [dev-dependencies]
 tokio = { version = "1.29.1", features = ["full"] }
