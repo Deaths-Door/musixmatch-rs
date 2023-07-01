@@ -207,5 +207,57 @@ pub struct Snippet {
 #[derive(Deserialize)]
 #[serde(crate = "api_request_utils_rs::serde")] // must be below the derive attribute
 pub struct Subtitle {
+    #[serde(rename = "subtitle_id")]
+    subtitle_id: i32,
+    #[serde(rename = "restricted")]
+    is_restricted: bool,
+    // TODO: Change the type based on the format used
+    // TODO: Change from string into list
+    subtitle_body: String,
+    subtitle_language: String,
+    script_tracking_url: String,
+    pixel_tracking_url: String,
+    html_tracking_url: String,
+    lyrics_copyright: String,
+}
 
+#[derive(Deserialize)]
+#[serde(crate = "api_request_utils_rs::serde")] // must be below the derive attribute
+pub struct Album {
+    #[serde(rename = "album_id")]
+    id: i32,
+    #[serde(rename = "album_mbid")]
+    music_brainz_identifier: Option<String>,
+    #[serde(rename = "album_name")]
+    name: String,
+    #[serde(rename = "album_rating")]
+    rating: i32,
+    #[serde(rename = "album_release_date")]
+    release_date: String,
+    #[serde(rename = "artist_id")]
+    artist_id: i32,
+    #[serde(rename = "artist_name")]
+    artist_name: String,
+    #[serde(rename = "album_pline")]
+    album_pline: String,
+    #[serde(rename = "album_copyright")]
+    album_copyright: String,
+    #[serde(rename = "album_label")]
+    album_label: String,
+    #[serde(rename = "primary_genres")]
+    genres: Vec<Genre>,
+    #[serde(rename = "restricted")]
+    is_restricted: bool,
+    #[serde(rename = "external_ids")]
+    external_identities: ExternalIdentities,
+    #[serde(rename = "updated_time")]
+    updated_time: String,
+}
+
+#[derive(Deserialize)]
+#[serde(crate = "api_request_utils_rs::serde")] // must be below the derive attribute
+pub struct ExternalIdentities {
+    spotify: Vec<String>,
+    itunes: Vec<String>,
+    amazon_music: Vec<String>,
 }
