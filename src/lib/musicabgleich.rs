@@ -31,7 +31,7 @@ use crate::{
     Album
 };
 
-struct MusixAbgleich<'a> {
+pub struct MusixAbgleich<'a> {
     client : Client,
     api_key : &'a str, 
     error_resolver : Box<&'a dyn Fn(&RequestError<Value>)>
@@ -60,11 +60,6 @@ impl<'a> MusixAbgleich<'a> {
         MusixAbgleich { client : Client::new(),api_key : api_key,error_resolver : Box::new(error_resolver) }
     }
 
-    fn body_content<'de,T : api_request_utils_rs::serde::de::DeserializeOwned>(value : &Value) -> T {
-        let body = value.get("body").unwrap();
-        from_value::<T>(*body).unwrap()
-    }
-
     async fn default_request_handler<'l,T : api_request_utils_rs::serde::de::DeserializeOwned>(&self,endpoint : &str,parameters : ParameterHashMap<'l>) -> Option<T> {
         let request = self.default_get_requestor(endpoint,parameters);
         let response = Self::request::<Value,Value>(request).await;
@@ -72,9 +67,8 @@ impl<'a> MusixAbgleich<'a> {
             (self.error_resolver)(&value)
         });
 
-
         result.and_then(|json|{
-            Some(Self::body_content(&json))
+            Some(from_value::<T>(json.get("body").unwrap().clone()).unwrap())
         })
     }
 
@@ -84,7 +78,7 @@ impl<'a> MusixAbgleich<'a> {
             parameters.insert(name,Some(string.as_str()))
         });        
     }
-    
+
    //----------------------------------------------------------------- 
 
     /// Retrieves the top artists by country.
@@ -652,6 +646,4 @@ impl<'a> MusixAbgleich<'a> {
     }
 
     //----------------------------------------------------------------- 
-
-
 }
