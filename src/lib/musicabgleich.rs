@@ -549,9 +549,7 @@ impl<'a> MusixAbgleich<'a> {
         self.default_request_handler("music.genres.get", parameters).await
     }
 
-
     //----------------------------------------------------------------- 
-
 
     /// Get the artist data from the Musixmatch database using the Musixmatch artist ID.
     ///

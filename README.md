@@ -2,6 +2,7 @@
 
 [![Crates.io](https://img.shields.io/crates/v/my_crate.svg)](https://crates.io/crates/musixmatch)
 [![Docs.rs](https://docs.rs/my_crate/badge.svg)](https://docs.rs/musixmatch)
+[![License](https://img.shields.io/crates/l/musixmatch.svg)](https://github.com//Deaths-Door/musixmatch-rs/blob/main/LICENSE)
 
 This repository provides access to the MusixMatch API, which is a comprehensive service for retrieving music metadata, lyrics, and album art. It offers a wide range of functionalities that can be leveraged to build music applications requiring access to this data. By utilizing this Rust implementation, developers can seamlessly integrate MusixMatch API capabilities into their Rust projects, enabling the development of powerful and feature-rich music applications.
 
@@ -41,12 +42,29 @@ musixmatch = { version = "0.1.0", features = ["marcos"] }
 
 ## Usage
 
+### Getting an ApiKey
+
+To use the MusixMatch API, you need an API key. Follow these steps to obtain an API key:
+
+- Visit the [MusixMatch Developer Portal](https://developer.musixmatch.com/) and click on "Getting Started" to begin the process.
+- Fill in the required information to create a developer account. Provide your name, email address, and choose a password. Accept the terms and conditions, and then click on "Sign Up" to create your account.
+- Click on "Create New Application" to start creating a new application. Provide the necessary details such as the application name, description, and website URL. You may also need to specify the type of application and agree to any additional terms or policies.
+- Once you have filled in the required information, submit the application.
+- After your application is reviewed and approved, you will receive an email notification containing your API key. This key will be associated with the application you created.
+
+`Note` : The exact steps and process may vary slightly depending on any updates or changes made to the MusixMatch Developer Portal. Please refer to the official documentation provided by MusixMatch for the most up-to-date instructions on obtaining an API key.
+
+## Calling Api Endpoints
+
 ```rust
 use musixmatch::MusixAbgleich;
 
 fn main() {
     // Create an instance of MusixAbgleich
-    let musicabgleich = MusixAbgleich::new("your_api_key");
+    let musicabgleich = MusixAbgleich::new("your_api_key",||{
+
+    });
+
     // Call methods with default arguments
     let artists = musicabgleich.top_artists_by_country(Some("US"), None, None);
     println!("{:?}", artists);
