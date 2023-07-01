@@ -6,6 +6,7 @@
 This repository provides access to the MusixMatch API, which is a comprehensive service for retrieving music metadata, lyrics, and album art. It offers a wide range of functionalities that can be leveraged to build music applications requiring access to this data. By utilizing this Rust implementation, developers can seamlessly integrate MusixMatch API capabilities into their Rust projects, enabling the development of powerful and feature-rich music applications.
 
 ## About
+
 The MusixMatch API is a comprehensive service that provides access to music metadata, lyrics, and album art. It offers a wide range of functionalities, including:
 
 - Searching for songs, artists, and albums
@@ -17,9 +18,10 @@ The MusixMatch API is a comprehensive service that provides access to music meta
 By leveraging the MusixMatch API, developers can build music applications that require access to this rich set of music-related data. The `musixmatch-rs` crate provides a convenient Rust implementation for interacting with the MusixMatch API, enabling seamless integration into Rust projects.
 
 For more information about the MusixMatch API and its capabilities, please refer to the [MusixMatch API Documentation](https://developer.musixmatch.com/documentation).
+
 ## Features
 
-- `default-args`: Enables the use of default arguments for methods using the `default-args` feature.
+- `marocs`: Enables the use of default arguments for methods using the `default-args` crate.
 
 ## Installation
 
