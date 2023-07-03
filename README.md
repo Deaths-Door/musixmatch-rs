@@ -4,7 +4,7 @@
 [![Docs.rs](https://docs.rs/my_crate/badge.svg)](https://docs.rs/musixmatch)
 [![License](https://img.shields.io/crates/l/musixmatch.svg)](https://github.com//Deaths-Door/musixmatch-rs/blob/main/LICENSE)
 
-This repository provides access to the MusixMatch API, which is a comprehensive service for retrieving music metadata, lyrics, and album art. It offers a wide range of functionalities that can be leveraged to build music applications requiring access to this data. By utilizing this Rust implementation, developers can seamlessly integrate MusixMatch API capabilities into their Rust projects, enabling the development of powerful and feature-rich music applications.
+This repository offers a wide range of functionalities that can be leveraged to build music applications requiring access to this musicmatch. By utilizing this Rust implementation, developers can seamlessly integrate MusixMatch API capabilities into their Rust projects, enabling the development of powerful and feature-rich music applications.
 
 ## About
 

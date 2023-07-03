@@ -3,6 +3,13 @@ name = "musixmatch"
 version = "0.1.0"
 edition = "2021"
 readme = "README.md"
+authors = ["Aarav Shah <aaravaditya51@gmail.com>"]
+description = "A lightweight and intuitive library for accessing musixmatch api in rust"
+documentation = "https://docs.rs/einfach-xml-builder"
+repository = "https://github.com/Deaths-Door/musixmatch"
+homepage = "https://github.com/Deaths-Door/musixmatch"
+license = "MIT OR Apache-2.0"
+keywords = ["musixmatch","api","lyrics","search","music"]
 
 [lib]
 path = "src/lib/mod.rs"

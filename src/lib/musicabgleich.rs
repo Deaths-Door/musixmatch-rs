@@ -54,7 +54,7 @@ impl RequestDefaults for MusixAbgleich<'_> {
 
 impl RequestHandler for MusixAbgleich<'_> {}
 
-/// impl track.search / track.richsync / artist.search / artist.albums.get / artist.related.get / album-tracks-get / catalogue.dump.get / work.post / work.validity.post / tracking.url.get
+/// impl track.search / track.richsync / artist.albums.get / artist.related.get / album-tracks-get / catalogue.dump.get / work.post / work.validity.post / tracking.url.get
 impl<'a> MusixAbgleich<'a> {
     pub fn new(api_key : &'a str,error_resolver : &'a dyn Fn(&RequestError<Value>)) -> Self {
         MusixAbgleich { client : Client::new(),api_key : api_key,error_resolver : Box::new(error_resolver) }
@@ -639,7 +639,6 @@ impl<'a> MusixAbgleich<'a> {
                 ("selected_language", Value::from(selected_language)),
                 ("f_subtitle_length", Value::from(subtitle_length)),
                 ("f_subtitle_length_max_deviation", Value::from(max_deviation)),
-
             ]
         );
         self.default_request_handler::<Value>("track.subtitle.translation.get", parameters).await.and_then(|value|{
@@ -679,6 +678,29 @@ impl<'a> MusixAbgleich<'a> {
     }
 
     //----------------------------------------------------------------- 
+
+    /// Search for artists in our database.
+    /// 
+    /// # Parameters
+    /// 
+    /// `q_artist` : The song artist
+    /// `f_artist_id` : When set, filter by this artist id
+    /// `f_artist_mbid` : When set, filter by this artist musicbrainz id
+    /// `page` : Define the page number for paginated results
+    /// `page_size` :Define the page size for paginated results. Range is 1 to 100.
+    pub async fn search_artist(&self, artist_song: Option<&str>, artist_id: Option<u32>, f_artist_mbid: Option<&str>, page: Option<u32>, page_size: Option<u8>) -> Option<Artist> {
+        let parameters = HashMap::from(
+            [
+                ("q_artist", Value::from(q_artist)),
+                ("f_artist_id", Value::from(f_artist_id)),
+                ("f_artist_mbid", Value::from(f_artist_mbid)),
+                ("page", Value::from(page)),
+                ("page_size", Value::from(page_size))
+            ]
+        );
+        self.default_request_handler("artist.search", parameters).await
+    }
+    
 
     /// Get the artist data from the Musixmatch database using the Musixmatch artist ID.
     ///
