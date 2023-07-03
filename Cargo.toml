@@ -11,8 +11,11 @@ path = "src/lib/mod.rs"
 marcos = ["dep:default-args"]
 
 [dependencies]
-api-request-utils-rs = { version = "0.1.7", features = ["export"] }
+api-request-utils-rs =  "0.1.8"
+# Cuz im lazy 
 strum = { version = "0.25", features = ["derive"] }
+
+#marocs feature
 default-args = { version = "1.0.0" , optional = true }
 
 [dev-dependencies]

@@ -1,263 +1,267 @@
-use api_request_utils_rs::serde::Deserialize;
+#![allow(dead_code)]
 
-#[derive(Deserialize)]
+use api_request_utils_rs::serde::{Deserialize,Serialize};
+
+#[derive(Deserialize, Serialize, Debug, PartialEq, PartialOrd )]
 #[serde(crate = "api_request_utils_rs::serde")] // must be below the derive attribute
 pub struct Translation {
-    language : String,
-    translation : String
+    pub language : String,
+    pub translation : String
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize, Debug, PartialEq,PartialOrd )]
 #[serde(crate = "api_request_utils_rs::serde")] // must be below the derive attribute
 pub struct Artist {
     #[serde(rename="artist_id")]
-    id : u16,
+    pub id : u16,
 
     #[serde(rename="artist_name")]
-    name : String,
+    pub name : String,
 
     #[serde(rename="artist_name_translation_list")]
-    name_translations : Vec<Translation>,
+    pub name_translations : Vec<Translation>,
 
     #[serde(rename="artist_comment")]
-    comment : String,
+    pub comment : String,
 
     #[serde(rename="artist_country")]
-    country : String,
+    pub country : String,
 
     #[serde(rename="artist_alias_list")]
-    alias : Vec<String>,
+    pub alias : Vec<String>,
 
     #[serde(rename="artist_rating")]
-    rating : u8,
+    pub rating : u8,
 
     #[serde(rename="restricted")]
-    is_restricted : bool,
+    pub is_restricted : bool,
 
     #[serde(rename="begin_date_year")]
-    begin_year : u16,
+    pub begin_year : u16,
 
     #[serde(rename="begin_date")]
-    begin_data : String,
+    pub begin_data : String,
 
     #[serde(rename="end_date_year")]
-    end_year : u16,
+    pub end_year : u16,
 
     #[serde(rename="end_date")]
-    end_data : String,
+    pub end_data : String,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize, Debug, PartialEq,PartialOrd )]
 #[serde(crate = "api_request_utils_rs::serde")] // must be below the derive attribute
 pub struct Track {
+    
     #[serde(rename = "track_id")]
-    id: i32,
+    pub id: i32,
+
     #[serde(rename = "track_name")]
-    name: String,
+    pub name: String,
+    
     #[serde(rename = "track_rating")]
-    rating: i32,
+    pub rating: i32,
+    
     #[serde(rename = "num_favourite")]
-    number_mal_added_to_favourite_by_music_match_users: i32,
+    pub number_mal_added_to_favourite_by_music_match_users: i32,
 
     #[serde(rename = "commontrack_id")]
-    common_track_id: i32,
+    pub common_track_id: i32,
 
     #[serde(rename = "instrumental")]
-    is_instrumental: bool,
+    pub is_instrumental: bool,
 
     #[serde(rename = "explicit")]
-    is_explicit: bool,
+    pub is_explicit: bool,
 
     #[serde(rename = "has_lyrics")]
-    has_lyrics: bool,
+    pub has_lyrics: bool,
 
     #[serde(rename = "has_subtitles")]
-    has_subtitles: bool,
+    pub has_subtitles: bool,
 
     #[serde(rename = "has_richsync")]
-    has_richsync: bool,
+    pub has_richsync: bool,
 
     #[serde(rename = "album_id")]
-    album_id: i32,
+    pub album_id: i32,
 
     #[serde(rename = "album_name")]
-    album_name: String,
+    pub album_name: String,
 
     #[serde(rename = "artist_id")]
-    artist_id: i32,
+    pub artist_id: i32,
 
     #[serde(rename = "artist_name")]
-    artist_name: String,
+    pub artist_name: String,
 
     #[serde(rename = "track_share_url")]
-    share_url: String,
+    pub share_url: String,
 
     #[serde(rename = "track_edit_url")]
-    edit_url: String,
+    pub edit_url: String,
 
     #[serde(rename = "restricted")]
-    is_restricted: bool,
+    pub is_restricted: bool,
 
     #[serde(rename = "updated_time")]
-    updated_time: String,
+    pub updated_time: String,
 
     #[serde(rename = "primary_genres")]
-    genres: Vec<Genre>,
+    pub genres: Vec<Genre>,
 
     #[serde(rename = "track_name_translation_list")]
-    translated_names: Vec<Translation>,
+    pub translated_names: Vec<Translation>,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize, Debug, PartialEq,PartialOrd )]
 #[serde(crate = "api_request_utils_rs::serde")] // must be below the derive attribute
 pub struct Genre {
     #[serde(rename = "music_genre_id")]
-    id: i32,
+    pub id: i32,
     #[serde(rename = "music_genre_parent_id")]
-    parent_id: i32,
+    pub parent_id: i32,
     #[serde(rename = "music_genre_name")]
-    name: String,
+    pub name: String,
     #[serde(rename = "music_genre_name_extended")]
-    name_extended: String,
+    pub name_extended: String,
     #[serde(rename = "music_genre_vanity")]
-    vanity: String
+    pub vanity: String
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize, Debug, PartialEq,PartialOrd )]
 #[serde(crate = "api_request_utils_rs::serde")] // must be below the derive attribute
 pub struct Lyrics {
     #[serde(rename = "lyrics_id")]
-    id: i32,
+    pub id: i32,
     
     #[serde(rename = "restricted")]
-    is_restricted: bool,
+    pub is_restricted: bool,
 
     #[serde(rename = "instrumental")]
-    is_instrumental: bool,
+    pub is_instrumental: bool,
 
     #[serde(rename = "explicit")]
-    is_explicit: bool,
+    pub is_explicit: bool,
 
     #[serde(rename = "lyrics_body")]
-    lyrics: String,
+    pub lyrics: String,
 
     #[serde(rename = "lyrics_language")]
-    language: String,
+    pub language: String,
 
     #[serde(rename = "script_tracking_url")]
-    script_tracking_url: String,
+    pub script_tracking_url: String,
 
     #[serde(rename = "pixel_tracking_url")]
-    pixel_tracking_url: String,
+    pub pixel_tracking_url: String,
 
     #[serde(rename = "lyrics_copyright")]
-    copyright: String,
+    pub copyright: String,
 
     #[serde(rename = "backlink_url")]
-    backlink_url: String
-    ,
+    pub backlink_url: String,
+
     #[serde(rename = "updated_time")]
-    updated_time: String,
+    pub updated_time: String,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize, Debug, PartialEq,PartialOrd )]
 #[serde(crate = "api_request_utils_rs::serde")] // must be below the derive attribute
 pub struct LyricMood {
-    mood_list: Vec<Mood>,
-    raw_data: RawData,
+    pub mood_list: Vec<Mood>,
+    pub raw_data: RawData,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize, Debug, PartialEq,PartialOrd )]
 #[serde(crate = "api_request_utils_rs::serde")] // must be below the derive attribute
 struct Mood {
-    label: String,
-    value: f32,
+    pub label: String,
+    pub value: f32,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize, Debug, PartialEq,PartialOrd )]
 #[serde(crate = "api_request_utils_rs::serde")] // must be below the derive attribute
 struct RawData {
-    valence: f32,
-    arousal: f32,
+    pub valence: f32,
+    pub arousal: f32,
 }
 
-#[derive(Deserialize)]
-#[serde(crate = "api_request_utils_rs::serde")]
+#[derive(Deserialize, Serialize, Debug, PartialEq,PartialOrd )]
+#[serde(crate = "api_request_utils_rs::serde")] // must be below the derive attribute
 pub struct Snippet {
     #[serde(rename = "snippet_language")]
-    language: String,
+    pub language: String,
     #[serde(rename = "snippet_id")]
-    id: i32,
+    pub id: i32,
     #[serde(rename = "restricted")]
-    is_restricted: bool,
+    pub is_restricted: bool,
     #[serde(rename = "instrumental")]
-    is_instrumental: bool,
+    pub is_instrumental: bool,
     #[serde(rename = "snippet_body")]
-    snippet_body: String,
+    pub snippet_body: String,
     #[serde(rename = "script_tracking_url")]
-    script_tracking_url: String,
+    pub script_tracking_url: String,
     #[serde(rename = "pixel_tracking_url")]
-    pixel_tracking_url: String,
+    pub pixel_tracking_url: String,
     #[serde(rename = "html_tracking_url")]
-    html_tracking_url: String,
+    pub html_tracking_url: String,
     #[serde(rename = "updated_time")]
-    updated_time: String,
+    pub updated_time: String,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize, Debug, PartialEq,PartialOrd )]
 #[serde(crate = "api_request_utils_rs::serde")] // must be below the derive attribute
 pub struct Subtitle {
     #[serde(rename = "subtitle_id")]
-    subtitle_id: i32,
+    pub subtitle_id: i32,
     #[serde(rename = "restricted")]
-    is_restricted: bool,
-    // TODO: Change the type based on the format used
-    // TODO: Change from string into list
-    subtitle_body: String,
-    subtitle_language: String,
-    script_tracking_url: String,
-    pixel_tracking_url: String,
-    html_tracking_url: String,
-    lyrics_copyright: String,
+    pub is_restricted: bool,
+    pub subtitle_body: String,
+    pub subtitle_language: String,
+    pub script_tracking_url: String,
+    pub pixel_tracking_url: String,
+    pub html_tracking_url: String,
+    pub lyrics_copyright: String,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize, Debug, PartialEq,PartialOrd )]
 #[serde(crate = "api_request_utils_rs::serde")] // must be below the derive attribute
 pub struct Album {
     #[serde(rename = "album_id")]
-    id: i32,
+    pub id: i32,
     #[serde(rename = "album_mbid")]
-    music_brainz_identifier: Option<String>,
+    pub music_brainz_identifier: Option<String>,
     #[serde(rename = "album_name")]
-    name: String,
+    pub name: String,
     #[serde(rename = "album_rating")]
-    rating: i32,
+    pub rating: i32,
     #[serde(rename = "album_release_date")]
-    release_date: String,
+    pub release_date: String,
     #[serde(rename = "artist_id")]
-    artist_id: i32,
+    pub artist_id: i32,
     #[serde(rename = "artist_name")]
-    artist_name: String,
+    pub artist_name: String,
     #[serde(rename = "album_pline")]
-    album_pline: String,
+    pub album_pline: String,
     #[serde(rename = "album_copyright")]
-    album_copyright: String,
+    pub album_copyright: String,
     #[serde(rename = "album_label")]
-    album_label: String,
+    pub album_label: String,
     #[serde(rename = "primary_genres")]
-    genres: Vec<Genre>,
+    pub genres: Vec<Genre>,
     #[serde(rename = "restricted")]
-    is_restricted: bool,
+    pub is_restricted: bool,
     #[serde(rename = "external_ids")]
-    external_identities: ExternalIdentities,
+    pub external_identities: ExternalIdentities,
     #[serde(rename = "updated_time")]
-    updated_time: String,
+    pub updated_time: String,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize, Debug, PartialEq,PartialOrd )]
 #[serde(crate = "api_request_utils_rs::serde")] // must be below the derive attribute
 pub struct ExternalIdentities {
-    spotify: Vec<String>,
-    itunes: Vec<String>,
-    amazon_music: Vec<String>,
+    pub spotify: Vec<String>,
+    pub itunes: Vec<String>,
+    pub amazon_music: Vec<String>,
 }

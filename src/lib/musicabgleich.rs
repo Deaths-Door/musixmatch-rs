@@ -14,7 +14,7 @@ use api_request_utils_rs::{
         Value,
         from_value
     },
-    ParameterHashMap
+    ParameterHashMap, 
 };
 
 use crate::{
@@ -54,7 +54,7 @@ impl RequestDefaults for MusixAbgleich<'_> {
 
 impl RequestHandler for MusixAbgleich<'_> {}
 
-/// impl track.search / track.richsync/ track.lyrics.translation.get /track.subtitle.translation.get / artist.search / artist.albums.get / artist.related.get / album-tracks-get / catalogue.dump.get / work.post / work.validity.post / tracking.url.get
+/// impl track.search / track.richsync / track.lyrics.translation.get /track.subtitle.translation.get / artist.search / artist.albums.get / artist.related.get / album-tracks-get / catalogue.dump.get / work.post / work.validity.post / tracking.url.get
 impl<'a> MusixAbgleich<'a> {
     pub fn new(api_key : &'a str,error_resolver : &'a dyn Fn(&RequestError<Value>)) -> Self {
         MusixAbgleich { client : Client::new(),api_key : api_key,error_resolver : Box::new(error_resolver) }
@@ -71,14 +71,7 @@ impl<'a> MusixAbgleich<'a> {
             Some(from_value::<T>(json.get("body").unwrap().clone()).unwrap())
         })
     }
-
-    fn insert<'l,T : ToString>(parameters : &mut ParameterHashMap<'l>,name : &'l str,value : Option<T>){
-        value.map(|it| {
-            let string = it.to_string();
-            parameters.insert(name,Some(string.as_str()))
-        });        
-    }
-
+    
    //----------------------------------------------------------------- 
 
     /// Retrieves the top artists by country.
@@ -110,11 +103,13 @@ impl<'a> MusixAbgleich<'a> {
     /// # }
     /// ```
     pub async fn top_artists_by_country(&self,country : Option<&str>,page : Option<u16>,page_size : Option<u8>) -> Option<Vec<Artist>> {
-        let mut parameters = HashMap::new(); 
-        parameters.insert("country",country);
-        Self::insert(&mut parameters, "page", page);
-        Self::insert(&mut parameters, "page_size", page_size);
-
+        let parameters = HashMap::from(
+            [
+                ("country",Value::from(country)),
+                ("page",Value::from(page)),
+                ("page_size",Value::from(page_size))
+            ]
+        ); 
         self.default_request_handler("chart.artists.get", parameters).await
     }
 
@@ -156,13 +151,15 @@ impl<'a> MusixAbgleich<'a> {
     /// # }
     /// ```
     pub async fn top_tracks_by_country(&self,country : Option<&str>,chart_name : Option<Chart>,has_lyrics : Option<bool>,page : Option<u16>,page_size : Option<u8>) -> Option<Vec<Track>> {
-        let mut parameters = HashMap::new();
-        parameters.insert("country",country);
-        Self::insert(&mut parameters, "chart_name", chart_name);
-        Self::insert(&mut parameters, "f_has_lyrics", has_lyrics);
-        Self::insert(&mut parameters, "page", page);
-        Self::insert(&mut parameters, "page_size", page_size);
-
+        let parameters = HashMap::from(
+            [
+                ("country",Value::from(country)),
+                ("chart_name",Value::from(chart_name)),
+                ("f_has_lyrics",Value::from(has_lyrics)),
+                ("page",Value::from(page)),
+                ("page_size",Value::from(page_size))
+            ]
+        ); 
         self.default_request_handler("chart.tracks.get", parameters).await
     }
    
@@ -200,10 +197,13 @@ impl<'a> MusixAbgleich<'a> {
     /// # }
     /// ```
     pub async fn track(&self,title : Option<&str>,artist : Option<&str>,album : Option<&str>) -> Option<Track> {
-        let mut parameters = HashMap::new(); 
-        parameters.insert("q_title",title);
-        parameters.insert("q_artist",artist);
-        parameters.insert("q_album",album);
+        let parameters = HashMap::from(
+            [
+                ("q_title",Value::from(title)),
+                ("q_artist",Value::from(artist)),
+                ("q_album",Value::from(album))
+            ]
+        ); 
         self.default_request_handler("matcher.track.get", parameters).await
     }
 
@@ -220,8 +220,7 @@ impl<'a> MusixAbgleich<'a> {
     /// let track = musixmatch.track_with_commontrack_id(id).await;
     /// ```
     pub async fn track_with_commontrack_id(&self, id: u32) -> Option<Track> {
-        let string = id.to_string();
-        let parameters = HashMap::from([("commontrack_id", Some(string.as_str()))]);
+        let parameters = HashMap::from( [ ("commontrack_id", Value::from(id)) ] );
         self.default_request_handler("track.get", parameters).await
     }
 
@@ -238,7 +237,7 @@ impl<'a> MusixAbgleich<'a> {
     /// let track = musixmatch.track_with_track_isrc(isrc).await;
     /// ```
     pub async fn track_with_track_isrc(&self, isrc: &str) -> Option<Track> {
-        let parameters = HashMap::from([("track_isrc", Some(isrc))]);
+        let parameters = HashMap::from([("track_isrc", Value::from(isrc))]);
         self.default_request_handler("track.get", parameters).await
     }
 
@@ -270,7 +269,7 @@ impl<'a> MusixAbgleich<'a> {
     /// # }
     /// ```
     pub async fn track_lyrics_with_track_isrc(&self,isrc: &str) -> Option<Lyrics> {
-        let parameters = HashMap::from([("track_isrc", Some(isrc))]);
+        let parameters = HashMap::from([("track_isrc",Value::from(isrc))]);
         self.default_request_handler("matcher.lyrics.get", parameters).await
     }
 
@@ -301,9 +300,12 @@ impl<'a> MusixAbgleich<'a> {
     /// # }
     /// ```
     pub async fn track_lyrics(&self,title : Option<&str>,artist : Option<&str>) -> Option<Lyrics> {
-        let mut parameters = HashMap::new(); 
-        parameters.insert("q_title",title);
-        parameters.insert("q_artist",artist);
+        let parameters = HashMap::from(
+            [
+                ("q_title",Value::from(title)),
+                ("q_artist",Value::from(artist)),
+            ]
+        ); 
         self.default_request_handler("matcher.lyrics.get", parameters).await
     }
 
@@ -320,7 +322,7 @@ impl<'a> MusixAbgleich<'a> {
     /// let lyrics = musixmatch.track_lyrics_with_commontrack_id(id).await;
     /// ```
     pub async fn track_lyrics_with_commontrack_id(&self, id: &str) -> Option<Lyrics> {
-        let parameters = HashMap::from([("commontrack_id", Some(id))]);
+        let parameters = HashMap::from([("commontrack_id", Value::from(id))]);
         self.default_request_handler("track.lyrics.get", parameters).await
     }
 
@@ -337,7 +339,7 @@ impl<'a> MusixAbgleich<'a> {
     /// let lyrics = musixmatch.track_lyrics_with_track_id(id).await;
     /// ```
     pub async fn track_lyrics_with_track_id(&self, id: &str) -> Option<Lyrics> {
-        let parameters = HashMap::from([("track_id", Some(id))]);
+        let parameters = HashMap::from([("track_id", Value::from(id))]);
         self.default_request_handler("track.lyrics.get", parameters).await
     }
 
@@ -356,7 +358,7 @@ impl<'a> MusixAbgleich<'a> {
     /// let mood = musixmatch.track_lyrics_mood_with_commontrack_id(id).await;
     /// ```
     pub async fn track_lyrics_mood_with_commontrack_id(&self, id: &str) -> Option<Lyrics> {
-        let parameters = HashMap::from([("commontrack_id", Some(id))]);
+        let parameters = HashMap::from([("commontrack_id", Value::from(id))]);
         self.default_request_handler("track.lyrics.mood.get", parameters).await
     }
 
@@ -373,7 +375,7 @@ impl<'a> MusixAbgleich<'a> {
     /// let mood = musixmatch.track_lyrics_mood_with_track_isrc(isrc).await;
     /// ```
     pub async fn track_lyrics_mood_with_track_isrc(&self, isrc: &str) -> Option<LyricMood> {
-        let parameters = HashMap::from([("track_isrc", Some(isrc))]);
+        let parameters = HashMap::from([("track_isrc", Value::from(isrc))]);
         self.default_request_handler("track.lyrics.mood.get", parameters).await
     }
 
@@ -404,8 +406,7 @@ impl<'a> MusixAbgleich<'a> {
     /// # }
     /// ```
     pub async fn track_snippet(&self, track_id: u32) -> Option<Snippet> {
-        let string = track_id.to_string();
-        let parameters = HashMap::from([("track_id", Some(string.as_str()))]);
+        let parameters = HashMap::from([("track_id", Value::from(track_id))]);
         self.default_request_handler("track.snippet.get", parameters).await
     }
 
@@ -445,13 +446,14 @@ impl<'a> MusixAbgleich<'a> {
     /// # }
     /// ```
     pub async fn track_subtitle(&self,commontrack_id : u32,subtitle_length/*seconds*/ : Option<u16>,max_deviation : Option<u8> /*seconds*/,format : Option<SubtitleFormat>) -> Option<Subtitle> {
-        let mut parameters = HashMap::new();
-        let string = commontrack_id.to_string();
-        parameters.insert("commontrack_id", Some(string.as_str()));
-        Self::insert(&mut parameters, "f_subtitle_length", subtitle_length);
-        Self::insert(&mut parameters, "f_subtitle_length_max_deviation", max_deviation);
-        Self::insert(&mut parameters, "subtitle_format", format);
-
+        let parameters = HashMap::from(
+            [
+                ("commontrack_id", Value::from(commontrack_id)),
+                ("f_subtitle_length", Value::from(subtitle_length)),
+                ("f_subtitle_length_max_deviation", Value::from(max_deviation)),
+                ("subtitle_format", Value::from(format))
+            ]
+        );
         self.default_request_handler("tracks.subtitle.get", parameters).await
     }
 
@@ -507,13 +509,15 @@ impl<'a> MusixAbgleich<'a> {
     /// # }
     /// ```
     pub async fn subtitle(&self,title : Option<&str>,artist : Option<&str>,album : Option<&str>,subtitle_length/*seconds*/ : Option<u16>,max_deviation : Option<u8> /*seconds*/) -> Option<Track> {
-        let mut parameters = HashMap::new();
-        parameters.insert("q_title",title);
-        parameters.insert("q_artist",artist);
-        parameters.insert("q_album",album);
-        
-        Self::insert(&mut parameters, "f_subtitle_length", subtitle_length);
-        Self::insert(&mut parameters, "f_subtitle_length_max_deviation", max_deviation);
+        let parameters = HashMap::from(
+            [
+                ("q_title",Value::from(title)),
+                ("q_artist",Value::from(artist)),
+                ("q_album",Value::from(album)),
+                ("f_subtitle_length", Value::from(subtitle_length)),
+                ("f_subtitle_length_max_deviation", Value::from(max_deviation)),
+            ]
+        ); 
 
         self.default_request_handler("matcher.subtitle.get", parameters).await
     }
@@ -575,8 +579,7 @@ impl<'a> MusixAbgleich<'a> {
     /// # }
     /// ```
     pub async fn artist_with_musixmatch_id(&self,id : u32) -> Option<Artist> {
-        let string = id.to_string();
-        let parameters = HashMap::from([("artist_id",Some(string.as_str()))]);
+        let parameters = HashMap::from([("artist_id",Value::from(id))]);
         self.default_request_handler("artist.get", parameters).await
     }
 
@@ -604,8 +607,7 @@ impl<'a> MusixAbgleich<'a> {
     /// # }
     /// ```
     pub async fn artist_with_musixbrainz_id(&self,id : u32) -> Option<Artist> {
-        let string = id.to_string();
-        let parameters = HashMap::from([("artist_mbid",Some(string.as_str()))]);
+        let parameters = HashMap::from([("artist_mbid",Value::from(id))]);
         self.default_request_handler("artist.get", parameters).await
     }
 
@@ -638,8 +640,7 @@ impl<'a> MusixAbgleich<'a> {
     /// # }
     /// ```
     pub async fn album(&self,id : u32) -> Option<Album> {
-        let string = id.to_string();
-        let parameters = HashMap::from([("album_id",Some(string.as_str()))]);
+        let parameters = HashMap::from([("album_id",Value::from(id))]);
         self.default_request_handler("album.get", parameters).await
     }
 

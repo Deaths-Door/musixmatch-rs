@@ -62,7 +62,8 @@ use musixmatch::MusixAbgleich;
 fn main() {
     // Create an instance of MusixAbgleich
     let musicabgleich = MusixAbgleich::new("your_api_key",||{
-
+        // Custom error handler for handling status codes 
+        // Look below for possible status codes from music match
     });
 
     // Call methods with default arguments
