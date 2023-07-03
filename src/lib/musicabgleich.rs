@@ -631,7 +631,7 @@ impl<'a> MusixAbgleich<'a> {
     /// `track_isrc`: A valid ISRC identifier.
     /// `f_subtitle_length`: The desired length of the subtitle in seconds.
     /// `f_subtitle_length_max_deviation`: The maximum deviation allowed from the f_subtitle_length in seconds.
-    pub async fn track_subtitle_translations_with_track_isrc(&self, id: &str,min_completed : Option<f32> /*percent*/,selected_language : Option<&str>/* (ISO 639-1) */,subtitle_length/*seconds*/ : Option<u16>,max_deviation : Option<u8> /*seconds*/)-> Option<Subtitle> {
+    pub async fn track_subtitle_translations_with_track_isrc(&self, id: &str,min_completed : Option<f32> /*percent*/,selected_language : Option<&str>/* (ISO 639-1) */,subtitle_length/*seconds*/ : Option<u16>,max_deviation : Option<u8> /*seconds*/) -> Option<Subtitle> {
         let parameters = HashMap::from(
             [
                 ("track_isrc", Value::from(id)),

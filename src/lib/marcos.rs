@@ -55,4 +55,12 @@ default_args! {
     export pub async fn track_lyrics_translations_with_commontrack_id(&self, id: &str,min_completed : Option<f32> = None /*percent*/,selected_language : Option<&str> = None/* (ISO 639-1) */) -> Option<Lyrics> { 
         musicabgleich.track_lyrics_translations_with_commontrack_id(id,min_completed,selected_language)
     }
+
+    export pub async fn track_subtitle_translations_with_track_isrc(&self, id: &str,min_completed : Option<f32> = None /*percent*/,selected_language : Option<&str> = None/* (ISO 639-1) */,subtitle_length/*seconds*/ : Option<u16> = None,max_deviation : Option<u8> = None /*seconds*/)-> Option<Subtitle> {
+        musicabgleich.track_subtitle_translations_with_track_isrc(id,min_completed,selected_language,subtitle_length,max_deviation)
+    }
+
+    export pub async fn track_subtitle_translations_with_commontrack_id(&self, id: &str,min_completed : Option<f32> = None /*percent*/,selected_language : Option<&str> = None/* (ISO 639-1) */,subtitle_length/*seconds*/ : Option<u16> = None,max_deviation : Option<u8> = None /*seconds*/)-> Option<Subtitle> {
+        musicabgleich.track_subtitle_translations_with_commontrack_id(id,min_completed,selected_language,subtitle_length,max_deviation)
+    }
 }
