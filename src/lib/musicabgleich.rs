@@ -68,7 +68,7 @@ impl<'a> MusixAbgleich<'a> {
         });
 
         result.and_then(|json|{
-            Some(from_value::<T>(json.get("body").unwrap().clone()).unwrap())
+            Some(from_value::<T>(*json.get("body").unwrap()).unwrap())
         })
     }
     
@@ -619,7 +619,7 @@ impl<'a> MusixAbgleich<'a> {
             ]
         );
         self.default_request_handler::<Value>("track.subtitle.translation.get", parameters).await.and_then(|value|{
-            Some(from_value(*value.get("subtitle_translated").unwrap()))
+            Some(from_value::<Subtitle>(*value.get("subtitle_translated").unwrap()).unwrap())
         })
     }
 
@@ -642,7 +642,7 @@ impl<'a> MusixAbgleich<'a> {
             ]
         );
         self.default_request_handler::<Value>("track.subtitle.translation.get", parameters).await.and_then(|value|{
-            Some(from_value(*value.get("subtitle_translated").unwrap()))
+            Some(from_value::<Subtitle>(*value.get("subtitle_translated").unwrap()).unwrap())
         })
     }
 
@@ -688,12 +688,12 @@ impl<'a> MusixAbgleich<'a> {
     /// `f_artist_mbid` : When set, filter by this artist musicbrainz id
     /// `page` : Define the page number for paginated results
     /// `page_size` :Define the page size for paginated results. Range is 1 to 100.
-    pub async fn search_artist(&self, artist_song: Option<&str>, artist_id: Option<u32>, f_artist_mbid: Option<&str>, page: Option<u32>, page_size: Option<u8>) -> Option<Artist> {
+    pub async fn search_artist(&self, artist_song: Option<&str>, artist_id: Option<u32>, artist_mbid: Option<&str>, page: Option<u32>, page_size: Option<u8>) -> Option<Artist> {
         let parameters = HashMap::from(
             [
-                ("q_artist", Value::from(q_artist)),
-                ("f_artist_id", Value::from(f_artist_id)),
-                ("f_artist_mbid", Value::from(f_artist_mbid)),
+                ("q_artist", Value::from(artist_song)),
+                ("f_artist_id", Value::from(artist_id)),
+                ("f_artist_mbid", Value::from(artist_mbid)),
                 ("page", Value::from(page)),
                 ("page_size", Value::from(page_size))
             ]
@@ -757,6 +757,53 @@ impl<'a> MusixAbgleich<'a> {
         let parameters = HashMap::from([("artist_mbid",Value::from(id))]);
         self.default_request_handler("artist.get", parameters).await
     }
+
+    //----------------------------------------------------------------- 
+
+    /// Get the album discography of an artist
+    /// 
+    /// # Parameters
+    /// 
+    /// artist_id : Musixmatch artist id
+    /// g_album_name : Group by Album Name
+    /// s_release_date : Sort by release date (asc|desc)
+    /// page : Define the page number for paginated results
+    /// page_size : Define the page size for paginated results. Range is 1 to 100.
+    pub async fn artist_relating_albums_with_id(&self,id:u32,album_name: Option<bool>,release_date_sort: Option<SortBy>, page: Option<u32>, page_size: Option<u8>) -> Option<Vec<Album>> {
+        let mut parameters = HashMap::from([
+            ("artist_id", Value::from(id)),
+            ("artist_mbid", Value::from(artist_mbid)),
+            ("g_album_name", Value::from(album_name)),
+            ("s_release_date", Value::from(release_date)),
+            ("page", Value::from(page)),
+            ("page_size", Value::from(page_size)),
+        ]);
+    
+        self.default_request_handler("artist.albums.get", parameters).await
+    }
+
+    /// Get the album discography of an artist
+    /// 
+    /// # Parameters
+    /// 
+    /// artist_mbid : Musicbrainz artist id
+    /// g_album_name : Group by Album Name
+    /// s_release_date : Sort by release date (asc|desc)
+    /// page : Define the page number for paginated results
+    /// page_size : Define the page size for paginated results. Range is 1 to 100. 
+    pub async fn artist_relating_albums_with_musixbrainz_id(&self,id:u32,album_name: Option<bool>,release_date_sort: Option<SortBy>, page: Option<u32>, page_size: Option<u8>) -> Option<Vec<Album>> {
+        let mut parameters = HashMap::from([
+            ("artist_mbid", Value::from(id)),
+            ("g_album_name", Value::from(album_name)),
+            ("s_release_date", Value::from(release_date)),
+            ("page", Value::from(page)),
+            ("page_size", Value::from(page_size)),
+        ]);
+    
+        self.default_request_handler("artist.albums.get", parameters).await
+    }
+
+
 
     //----------------------------------------------------------------- 
 
