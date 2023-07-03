@@ -54,19 +54,19 @@ pub struct Artist {
 pub struct Track {
     
     #[serde(rename = "track_id")]
-    pub id: i32,
+    pub id: u32,
 
     #[serde(rename = "track_name")]
     pub name: String,
     
     #[serde(rename = "track_rating")]
-    pub rating: i32,
+    pub rating: u32,
     
     #[serde(rename = "num_favourite")]
-    pub number_mal_added_to_favourite_by_music_match_users: i32,
+    pub number_mal_added_to_favourite_by_music_match_users: u32,
 
     #[serde(rename = "commontrack_id")]
-    pub common_track_id: i32,
+    pub common_track_id: u32,
 
     #[serde(rename = "instrumental")]
     pub is_instrumental: bool,
@@ -84,13 +84,13 @@ pub struct Track {
     pub has_richsync: bool,
 
     #[serde(rename = "album_id")]
-    pub album_id: i32,
+    pub album_id: u32,
 
     #[serde(rename = "album_name")]
     pub album_name: String,
 
     #[serde(rename = "artist_id")]
-    pub artist_id: i32,
+    pub artist_id: u32,
 
     #[serde(rename = "artist_name")]
     pub artist_name: String,
@@ -118,9 +118,9 @@ pub struct Track {
 #[serde(crate = "api_request_utils_rs::serde")] // must be below the derive attribute
 pub struct Genre {
     #[serde(rename = "music_genre_id")]
-    pub id: i32,
+    pub id: u32,
     #[serde(rename = "music_genre_parent_id")]
-    pub parent_id: i32,
+    pub parent_id: u32,
     #[serde(rename = "music_genre_name")]
     pub name: String,
     #[serde(rename = "music_genre_name_extended")]
@@ -133,7 +133,7 @@ pub struct Genre {
 #[serde(crate = "api_request_utils_rs::serde")] // must be below the derive attribute
 pub struct Lyrics {
     #[serde(rename = "lyrics_id")]
-    pub id: i32,
+    pub id: u32,
     
     #[serde(rename = "restricted")]
     pub is_restricted: bool,
@@ -175,14 +175,14 @@ pub struct LyricMood {
 
 #[derive(Deserialize, Serialize, Debug, PartialEq,PartialOrd )]
 #[serde(crate = "api_request_utils_rs::serde")] // must be below the derive attribute
-struct Mood {
+pub struct Mood {
     pub label: String,
     pub value: f32,
 }
 
 #[derive(Deserialize, Serialize, Debug, PartialEq,PartialOrd )]
 #[serde(crate = "api_request_utils_rs::serde")] // must be below the derive attribute
-struct RawData {
+pub struct RawData {
     pub valence: f32,
     pub arousal: f32,
 }
@@ -193,7 +193,7 @@ pub struct Snippet {
     #[serde(rename = "snippet_language")]
     pub language: String,
     #[serde(rename = "snippet_id")]
-    pub id: i32,
+    pub id: u32,
     #[serde(rename = "restricted")]
     pub is_restricted: bool,
     #[serde(rename = "instrumental")]
@@ -214,7 +214,7 @@ pub struct Snippet {
 #[serde(crate = "api_request_utils_rs::serde")] // must be below the derive attribute
 pub struct Subtitle {
     #[serde(rename = "subtitle_id")]
-    pub subtitle_id: i32,
+    pub subtitle_id: u32,
     #[serde(rename = "restricted")]
     pub is_restricted: bool,
     pub subtitle_body: String,
@@ -229,17 +229,17 @@ pub struct Subtitle {
 #[serde(crate = "api_request_utils_rs::serde")] // must be below the derive attribute
 pub struct Album {
     #[serde(rename = "album_id")]
-    pub id: i32,
+    pub id: u32,
     #[serde(rename = "album_mbid")]
     pub music_brainz_identifier: Option<String>,
     #[serde(rename = "album_name")]
     pub name: String,
     #[serde(rename = "album_rating")]
-    pub rating: i32,
+    pub rating: u32,
     #[serde(rename = "album_release_date")]
     pub release_date: String,
     #[serde(rename = "artist_id")]
-    pub artist_id: i32,
+    pub artist_id: u32,
     #[serde(rename = "artist_name")]
     pub artist_name: String,
     #[serde(rename = "album_pline")]

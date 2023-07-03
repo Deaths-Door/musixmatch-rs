@@ -20,6 +20,7 @@ use api_request_utils_rs::{
 use crate::{
     SubtitleFormat, 
     Chart,
+    SortBy,
 
     Artist,
     Track,
@@ -28,7 +29,9 @@ use crate::{
     Snippet,
     Genre,
     Subtitle,
-    Album
+    Album,
+
+    TrackSearchQuery
 };
 
 pub struct MusixAbgleich<'a> {
@@ -54,7 +57,8 @@ impl RequestDefaults for MusixAbgleich<'_> {
 
 impl RequestHandler for MusixAbgleich<'_> {}
 
-/// impl track.search / track.richsync / artist.albums.get / artist.related.get / album-tracks-get / catalogue.dump.get / work.post / work.validity.post / tracking.url.get
+/// At this moment these endpoints are not implemented 
+/// - catalogue.dump.get / work.post / work.validity.post / track.richsync / 
 impl<'a> MusixAbgleich<'a> {
     pub fn new(api_key : &'a str,error_resolver : &'a dyn Fn(&RequestError<Value>)) -> Self {
         MusixAbgleich { client : Client::new(),api_key : api_key,error_resolver : Box::new(error_resolver) }
@@ -68,7 +72,7 @@ impl<'a> MusixAbgleich<'a> {
         });
 
         result.and_then(|json|{
-            Some(from_value::<T>(*json.get("body").unwrap()).unwrap())
+            Some(from_value::<T>(json.get("body").unwrap().clone()).unwrap())
         })
     }
     
@@ -164,6 +168,31 @@ impl<'a> MusixAbgleich<'a> {
     }
    
    //----------------------------------------------------------------- 
+
+    /// Search for track in our database.
+    /// 
+    /// # Parameters
+    /// 
+    /// `q_track` : The song title
+    /// `q_artist` : The song artist
+    /// `q_lyrics` : Any word in the lyrics
+    /// `q_track_artist` : Any word in the song title or artist name
+    /// `q_writer` : Search among writers
+    /// `q` : Any word in the song title or artist name or lyrics
+    /// `f_artist_id` : When set, filter by this artist id
+    /// `f_music_genre_i`d : When set, filter by this music category id
+    /// `f_lyrics_language` : Filter by the lyrics language (en,it,..)
+    /// `f_has_lyrics` : When set, filter only contents with lyrics
+    /// `f_track_release_group_first_release_date_min` : When set, filter the tracks with release date newer than value, format is YYYYMMDD
+    /// `f_track_release_group_first_release_date_max` : When set, filter the tracks with release date older than value, format is YYYYMMDD
+    /// `s_artist_rating` : Sort by our popularity index for artists (asc|desc)
+    /// `s_track_rating` : Sort by our popularity index for tracks (asc|desc)
+    /// `quorum_factor` : Search only a part of the given query string.Allowed range is (0.1 – 0.9)
+    /// `page` : Define the page number for paginated results
+    /// `page_size` : Define the page size for paginated results. Range is 1 to 100.
+    pub async fn search_track<'l>(&self,query : TrackSearchQuery<'l>) -> Option<Track> {
+        self.default_request_handler("track.search", query.0).await
+    }
 
     /// Match a song against the Musixmatch database.
     ///
@@ -619,7 +648,7 @@ impl<'a> MusixAbgleich<'a> {
             ]
         );
         self.default_request_handler::<Value>("track.subtitle.translation.get", parameters).await.and_then(|value|{
-            Some(from_value::<Subtitle>(*value.get("subtitle_translated").unwrap()).unwrap())
+            Some(from_value::<Subtitle>(value.get("subtitle_translated").unwrap().clone()).unwrap())
         })
     }
 
@@ -642,39 +671,8 @@ impl<'a> MusixAbgleich<'a> {
             ]
         );
         self.default_request_handler::<Value>("track.subtitle.translation.get", parameters).await.and_then(|value|{
-            Some(from_value::<Subtitle>(*value.get("subtitle_translated").unwrap()).unwrap())
+            Some(from_value::<Subtitle>(value.get("subtitle_translated").unwrap().clone()).unwrap())
         })
-    }
-
-    //----------------------------------------------------------------- 
-
-    /// Get the list of music genres in the catalogue.
-    ///
-    /// # Authentication
-    ///
-    /// This method requires authentication.
-    ///
-    /// # Examples
-    ///
-    /// Get the list of all genres:
-    /// ```
-    /// # use musixmatch::MusixAbgleich;
-    /// # #[tokio::main]
-    /// # async fn main() {
-    /// # let api = MusixAbgleich::new("YOUR_API_KEY");
-    /// let genres = api.genres().await;
-    /// if let Some(genres) = genres {
-    ///     for genre in genres {
-    ///         println!("Genre: {}", genre.genre_name);
-    ///     }
-    /// } else {
-    ///     println!("No genres found.");
-    /// }
-    /// # }
-    /// ```
-    pub async fn genres(&self) -> Option<Vec<Genre>> {
-        let parameters = HashMap::new();
-        self.default_request_handler("music.genres.get", parameters).await
     }
 
     //----------------------------------------------------------------- 
@@ -770,11 +768,10 @@ impl<'a> MusixAbgleich<'a> {
     /// page : Define the page number for paginated results
     /// page_size : Define the page size for paginated results. Range is 1 to 100.
     pub async fn artist_relating_albums_with_id(&self,id:u32,album_name: Option<bool>,release_date_sort: Option<SortBy>, page: Option<u32>, page_size: Option<u8>) -> Option<Vec<Album>> {
-        let mut parameters = HashMap::from([
+        let parameters = HashMap::from([
             ("artist_id", Value::from(id)),
-            ("artist_mbid", Value::from(artist_mbid)),
             ("g_album_name", Value::from(album_name)),
-            ("s_release_date", Value::from(release_date)),
+            ("s_release_date", Value::from(release_date_sort)),
             ("page", Value::from(page)),
             ("page_size", Value::from(page_size)),
         ]);
@@ -792,10 +789,10 @@ impl<'a> MusixAbgleich<'a> {
     /// page : Define the page number for paginated results
     /// page_size : Define the page size for paginated results. Range is 1 to 100. 
     pub async fn artist_relating_albums_with_musixbrainz_id(&self,id:u32,album_name: Option<bool>,release_date_sort: Option<SortBy>, page: Option<u32>, page_size: Option<u8>) -> Option<Vec<Album>> {
-        let mut parameters = HashMap::from([
+        let parameters = HashMap::from([
             ("artist_mbid", Value::from(id)),
             ("g_album_name", Value::from(album_name)),
-            ("s_release_date", Value::from(release_date)),
+            ("s_release_date", Value::from(release_date_sort)),
             ("page", Value::from(page)),
             ("page_size", Value::from(page_size)),
         ]);
@@ -803,7 +800,41 @@ impl<'a> MusixAbgleich<'a> {
         self.default_request_handler("artist.albums.get", parameters).await
     }
 
+    //----------------------------------------------------------------- 
 
+    /// Get a list of artists somehow related to a given one.
+    /// 
+    /// # Parameters
+    /// 
+    /// `artist_id` : The musiXmatch artist id
+    /// `page` : Define the page number for paginated results
+    /// `page_size` : Define the page size for paginated results. Range is 1 to 100
+    pub async fn artist_relating_artist_with_id(&self,id:u32,page: Option<u32>, page_size: Option<u8>) -> Option<Vec<Artist>> {
+        let parameters = HashMap::from([
+            ("artist_id", Value::from(id)),
+            ("page", Value::from(page)),
+            ("page_size", Value::from(page_size)),
+        ]);
+    
+        self.default_request_handler("artist.related.get", parameters).await
+    }
+
+    /// Get a list of artists somehow related to a given one.
+    /// 
+    /// # Parameters
+    /// 
+    /// `artist_mbid` : The musicbrainz artist id
+    /// `page` : Define the page number for paginated results
+    /// `page_size` : Define the page size for paginated results. Range is 1 to 100
+    pub async fn artist_relating_artist_with_musixbrainz_id(&self,id:u32,page: Option<u32>, page_size: Option<u8>) -> Option<Vec<Artist>> {
+        let parameters = HashMap::from([
+            ("artist_mbid", Value::from(id)),
+            ("page", Value::from(page)),
+            ("page_size", Value::from(page_size)),
+        ]);
+    
+        self.default_request_handler("artist.related.get", parameters).await
+    }
 
     //----------------------------------------------------------------- 
 
@@ -838,5 +869,94 @@ impl<'a> MusixAbgleich<'a> {
         self.default_request_handler("album.get", parameters).await
     }
 
+    /// This api provides you the list of the songs of an album.
+    /// 
+    /// # Parameters
+    /// 
+    /// album_id : Musixmatch album id
+    /// has_lyrics :When set, filter only contents with lyrics
+    /// page : Define the page number for paginated results
+    /// page_size : Define the page size for paginated results. Range is 1 to 100.
+    pub async fn album_tracks_with_id(&self,id: u32,has_lyrics: Option<bool>, page: Option<u32>, page_size: Option<u8>) -> Option<Vec<Track>> {
+        let parameters = HashMap::from([
+            ("album_id", Value::from(id)),
+            ("f_has_lyrics", Value::from(has_lyrics)),
+            ("page", Value::from(page)),
+            ("page_size", Value::from(page_size)),
+        ]);
+
+        self.default_request_handler("album.tracks.get", parameters).await
+    }
+
+    
+    /// This api provides you the list of the songs of an album.
+    /// 
+    /// # Parameters
+    /// 
+    /// album_mbid : Musicbrainz album id
+    /// has_lyrics :When set, filter only contents with lyrics
+    /// page : Define the page number for paginated results
+    /// page_size : Define the page size for paginated results. Range is 1 to 100.
+    pub async fn album_tracks_with_musixbrainz_id(&self,id: u32 ,has_lyrics: Option<bool>, page: Option<u32>, page_size: Option<u8>) -> Option<Vec<Track>> {
+        let parameters = HashMap::from([
+            ("album_mbid", Value::from(id)),
+            ("f_has_lyrics", Value::from(has_lyrics)),
+            ("page", Value::from(page)),
+            ("page_size", Value::from(page_size)),
+        ]);
+
+        self.default_request_handler("album.tracks.get", parameters).await
+    }
+
+
     //----------------------------------------------------------------- 
+
+    /// Get the list of music genres in the catalogue.
+    ///
+    /// # Authentication
+    ///
+    /// This method requires authentication.
+    ///
+    /// # Examples
+    ///
+    /// Get the list of all genres:
+    /// ```
+    /// # use musixmatch::MusixAbgleich;
+    /// # #[tokio::main]
+    /// # async fn main() {
+    /// # let api = MusixAbgleich::new("YOUR_API_KEY");
+    /// let genres = api.genres().await;
+    /// if let Some(genres) = genres {
+    ///     for genre in genres {
+    ///         println!("Genre: {}", genre.genre_name);
+    ///     }
+    /// } else {
+    ///     println!("No genres found.");
+    /// }
+    /// # }
+    /// ```
+    pub async fn genres(&self) -> Option<Vec<Genre>> {
+        let parameters = HashMap::new();
+        self.default_request_handler("music.genres.get", parameters).await
+    }
+
+    //----------------------------------------------------------------- 
+
+
+    /// Get the base url for the tracking script
+    /// 
+    /// With this api you’ll be able to get the base url for the tracking script you need to insert in your page to legalize your existent lyrics library.
+    ///
+    /// Read more here: <https://developer.musixmatch.com/documentation/rights-clearance-on-your-existing-catalog>
+    ///
+    /// In case you’re fetching the lyrics by the musiXmatch api called track.lyrics.get you don’t need to implement this API call.
+    /// # Parameters
+    /// 
+    /// `domain` : Your domain name
+    pub async fn tracking_url(&self,domain : &str) -> Option<String> {
+        let parameters = HashMap::from([("domain",Value::from(domain))]);
+        self.default_request_handler::<Value>("tracking.url.get", parameters).await.and_then(|value|{
+            Some(value.get("url").unwrap().as_str().unwrap().to_string())
+        })
+    }
 }

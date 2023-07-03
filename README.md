@@ -2,7 +2,7 @@
 
 [![Crates.io](https://img.shields.io/crates/v/my_crate.svg)](https://crates.io/crates/musixmatch)
 [![Docs.rs](https://docs.rs/my_crate/badge.svg)](https://docs.rs/musixmatch)
-[![License](https://img.shields.io/crates/l/musixmatch.svg)](https://github.com//Deaths-Door/musixmatch-rs/blob/main/LICENSE)
+[![License](https://img.shields.io/crates/l/musixmatch.svg)](https://github.com/Deaths-Door/musixmatch-rs/blob/main/LICENSE)
 
 This repository offers a wide range of functionalities that can be leveraged to build music applications requiring access to this musicmatch. By utilizing this Rust implementation, developers can seamlessly integrate MusixMatch API capabilities into their Rust projects, enabling the development of powerful and feature-rich music applications.
 
@@ -30,14 +30,14 @@ Add this to your `Cargo.toml` for default features:
 
 ```toml
 [dependencies]
-musixmatch = "0.1.0"
+musixmatch = "0.1.0" # Note version at time of writing
 ```
 
 With the `marocs` feature enabled, you can use default arguments for methods in the MusixAbgleich API. This allows you to omit certain parameters and have them set to default values automatically (None).
 
 ```toml
 [dependencies]
-musixmatch = { version = "0.1.0", features = ["marcos"] }
+musixmatch = { version = "0.1.0", features = ["marcos"] } # Note version at time of writing
 ```
 
 ## Usage
