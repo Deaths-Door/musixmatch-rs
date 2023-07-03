@@ -54,7 +54,7 @@ impl RequestDefaults for MusixAbgleich<'_> {
 
 impl RequestHandler for MusixAbgleich<'_> {}
 
-/// impl track.search / track.richsync / track.lyrics.translation.get /track.subtitle.translation.get / artist.search / artist.albums.get / artist.related.get / album-tracks-get / catalogue.dump.get / work.post / work.validity.post / tracking.url.get
+/// impl track.search / track.richsync /track.subtitle.translation.get / artist.search / artist.albums.get / artist.related.get / album-tracks-get / catalogue.dump.get / work.post / work.validity.post / tracking.url.get
 impl<'a> MusixAbgleich<'a> {
     pub fn new(api_key : &'a str,error_resolver : &'a dyn Fn(&RequestError<Value>)) -> Self {
         MusixAbgleich { client : Client::new(),api_key : api_key,error_resolver : Box::new(error_resolver) }
@@ -341,6 +341,81 @@ impl<'a> MusixAbgleich<'a> {
     pub async fn track_lyrics_with_track_id(&self, id: &str) -> Option<Lyrics> {
         let parameters = HashMap::from([("track_id", Value::from(id))]);
         self.default_request_handler("track.lyrics.get", parameters).await
+    }
+
+
+    //-----------------------------------------------------------------  
+
+    /// Get a translated lyrics for a given language
+    ///
+    /// # Arguments
+    /// * `commontrack_id` : The Musixmatch commontrack id
+    /// * `selected_language` : The language of the translated lyrics (ISO 639-1)  
+    /// * `min_completed` : Teal from 0 to 1. If present, only the tracks with a translation ratio over this specific value, for a given language, are returned Set it to 1 for completed translation only, to 0.7 for a mimimum of 70% complete translation.
+    pub async fn track_lyrics_translations_with_commontrack_id(&self, id: &str,min_completed : Option<f32> /*percent*/,selected_language : Option<&str>/* (ISO 639-1) */) -> Option<Lyrics> {
+        let parameters = HashMap::from(
+            [
+                ("commontrack_id", Value::from(id)),
+                ("min_completed", Value::from(min_completed))
+                ("selected_language", Value::from(selected_language))
+
+            ]
+        );
+        self.default_request_handler("track.lyrics.translation.get", parameters).await
+    }
+
+    /// Get a translated lyrics for a given language
+    ///
+    /// # Arguments
+    /// * `track_id` : The Musixmatch track id
+    /// * `selected_language` : The language of the translated lyrics (ISO 639-1)  
+    /// * `min_completed` : Teal from 0 to 1. If present, only the tracks with a translation ratio over this specific value, for a given language, are returned Set it to 1 for completed translation only, to 0.7 for a mimimum of 70% complete translation.
+    pub async fn track_lyrics_translations_with_track_id(&self, id: &str,min_completed : Option<f32> /*percent*/,selected_language : Option<&str>/* (ISO 639-1) */) -> Option<Lyrics> {
+        let parameters = HashMap::from(
+            [
+                ("track_id", Value::from(id)),
+                ("min_completed", Value::from(min_completed))
+                ("selected_language", Value::from(selected_language))
+
+            ]
+        );
+        self.default_request_handler("track.lyrics.translation.get", parameters).await
+    }
+
+    /// Get a translated lyrics for a given language
+    ///
+    /// # Arguments
+    /// * `track_isrc` : A valid ISRC identifier
+    /// * `selected_language` : The language of the translated lyrics (ISO 639-1)  
+    /// * `min_completed` : Teal from 0 to 1. If present, only the tracks with a translation ratio over this specific value, for a given language, are returned Set it to 1 for completed translation only, to 0.7 for a mimimum of 70% complete translation.
+    pub async fn track_lyrics_translations_with_track_irsc(&self, id: &str,min_completed : Option<f32> /*percent*/,selected_language : Option<&str>/* (ISO 639-1) */) -> Option<Lyrics> {
+        let parameters = HashMap::from(
+            [
+                ("track_isrc", Value::from(id)),
+                ("min_completed", Value::from(min_completed))
+                ("selected_language", Value::from(selected_language))
+
+            ]
+        );
+        self.default_request_handler("track.lyrics.translation.get", parameters).await
+    }
+
+    /// Get a translated lyrics for a given language
+    ///
+    /// # Arguments
+    /// * `track_mbid` : The musicbrainz recording id
+    /// * `selected_language` : The language of the translated lyrics (ISO 639-1)  
+    /// * `min_completed` : Teal from 0 to 1. If present, only the tracks with a translation ratio over this specific value, for a given language, are returned Set it to 1 for completed translation only, to 0.7 for a mimimum of 70% complete translation.
+    pub async fn track_lyrics_translations_with_musixbrainx_id(&self, id: &str,min_completed : Option<f32> /*percent*/,selected_language : Option<&str>/* (ISO 639-1) */) -> Option<Lyrics> {
+        let parameters = HashMap::from(
+            [
+                ("track_mbid", Value::from(id)),
+                ("min_completed", Value::from(min_completed))
+                ("selected_language", Value::from(selected_language))
+
+            ]
+        );
+        self.default_request_handler("track.lyrics.translation.get", parameters).await
     }
 
    //----------------------------------------------------------------- 

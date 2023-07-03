@@ -41,4 +41,20 @@ default_args! {
     export pub async fn subtitle(&self,title : Option<&str> = None,artist : Option<&str> = None,album : Option<&str> = None,subtitle_length/*seconds*/ : Option<u16> = None,max_deviation : Option<u8> /*seconds*/ = None) -> Option<Track> {
         musicabgleich.track_subtitle(title,artist,max_deviation,album,subtitle_length,max_deviation)
     }
+
+    export pub async fn track_lyrics_translations_with_track_irsc(&self, id: &str,min_completed : Option<f32> = None /*percent*/,selected_language : Option<&str> = None/* (ISO 639-1) */) -> Option<Lyrics> { 
+        musicabgleich.track_lyrics_translations_with_track_irsc(id,min_completed,selected_language)
+    }
+
+    export pub async fn track_lyrics_translations_with_musixbrainx_id(&self, id: &str,min_completed : Option<f32> = None /*percent*/,selected_language : Option<&str> = None/* (ISO 639-1) */) -> Option<Lyrics> { 
+        musicabgleich.track_lyrics_translations_with_musixbrainx_id(id,min_completed,selected_language)
+    }
+
+    export pub async fn track_lyrics_translations_with_track_id(&self, id: &str,min_completed : Option<f32> = None/*percent*/,selected_language : Option<&str> = None/* (ISO 639-1) */) -> Option<Lyrics> { 
+        musicabgleich.track_lyrics_translations_with_track_id(id,min_completed,selected_language)
+    }
+
+    export pub async fn track_lyrics_translations_with_commontrack_id(&self, id: &str,min_completed : Option<f32> = None /*percent*/,selected_language : Option<&str> = None/* (ISO 639-1) */) -> Option<Lyrics> { 
+        musicabgleich.track_lyrics_translations_with_commontrack_id(id,min_completed,selected_language)
+    }
 }
