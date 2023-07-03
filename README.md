@@ -42,8 +42,6 @@ musixmatch = { version = "0.1.0", features = ["marcos"] }
 
 ## Usage
 
-### Getting an ApiKey
-
 To use the MusixMatch API, you need an API key. Follow these steps to obtain an API key:
 
 - Visit the [MusixMatch Developer Portal](https://developer.musixmatch.com/) and click on "Getting Started" to begin the process.
@@ -53,8 +51,6 @@ To use the MusixMatch API, you need an API key. Follow these steps to obtain an 
 - After your application is reviewed and approved, you will receive an email notification containing your API key. This key will be associated with the application you created.
 
 `Note` : The exact steps and process may vary slightly depending on any updates or changes made to the MusixMatch Developer Portal. Please refer to the official documentation provided by MusixMatch for the most up-to-date instructions on obtaining an API key.
-
-## Calling Api Endpoints
 
 ```rust
 use musixmatch::MusixAbgleich;

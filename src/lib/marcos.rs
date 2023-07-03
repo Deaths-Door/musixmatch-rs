@@ -14,8 +14,7 @@ use crate::{
     Album
 };
 
-/// Note: Refer to the original documentation of the `top_artists_by_country`
-/// method in the `MusixAbgleich` struct for more details and authentication requirements.
+/// Note: Refer to the original documentation of the methods in the `MusixAbgleich` struct for more details and authentication requirements.
 default_args! { 
     export pub async fn top_artists_by_country(musicabgleich : MusixAbgleich,country : Option<&str> = None,page : Option<u16>  = None,page_size : Option<u8>  = None) -> Option<Vec<Artist>> {
         musicabgleich.top_artists_by_country(country,page,page_size)
@@ -32,7 +31,6 @@ default_args! {
     export pub async fn track_lyrics(&self,title : Option<&str> = None,artist : Option<&str> = None) -> Option<Lyrics> {
         musicabgleich.track_lyrics(title,artist)
     }
-
 
     export pub async fn track_subtitle(&self,commontrack_id : u32 = None,subtitle_length/*seconds*/ : Option<u16> = None,max_deviation : Option<u8> /*seconds*/ = None,format : Option<SubtitleFormat> = None) -> Option<Subtitle> {
         musicabgleich.track_subtitle(commontrack_id,subtitle_length,max_deviation,format)

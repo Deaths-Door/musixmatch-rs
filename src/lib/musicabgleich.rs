@@ -54,7 +54,7 @@ impl RequestDefaults for MusixAbgleich<'_> {
 
 impl RequestHandler for MusixAbgleich<'_> {}
 
-/// impl track.search / track.richsync /track.subtitle.translation.get / artist.search / artist.albums.get / artist.related.get / album-tracks-get / catalogue.dump.get / work.post / work.validity.post / tracking.url.get
+/// impl track.search / track.richsync / artist.search / artist.albums.get / artist.related.get / album-tracks-get / catalogue.dump.get / work.post / work.validity.post / tracking.url.get
 impl<'a> MusixAbgleich<'a> {
     pub fn new(api_key : &'a str,error_resolver : &'a dyn Fn(&RequestError<Value>)) -> Self {
         MusixAbgleich { client : Client::new(),api_key : api_key,error_resolver : Box::new(error_resolver) }
@@ -356,8 +356,8 @@ impl<'a> MusixAbgleich<'a> {
         let parameters = HashMap::from(
             [
                 ("commontrack_id", Value::from(id)),
-                ("min_completed", Value::from(min_completed))
-                ("selected_language", Value::from(selected_language))
+                ("min_completed", Value::from(min_completed)),
+                ("selected_language", Value::from(selected_language)),
 
             ]
         );
@@ -374,8 +374,8 @@ impl<'a> MusixAbgleich<'a> {
         let parameters = HashMap::from(
             [
                 ("track_id", Value::from(id)),
-                ("min_completed", Value::from(min_completed))
-                ("selected_language", Value::from(selected_language))
+                ("min_completed", Value::from(min_completed)),
+                ("selected_language", Value::from(selected_language)),
 
             ]
         );
@@ -392,8 +392,8 @@ impl<'a> MusixAbgleich<'a> {
         let parameters = HashMap::from(
             [
                 ("track_isrc", Value::from(id)),
-                ("min_completed", Value::from(min_completed))
-                ("selected_language", Value::from(selected_language))
+                ("min_completed", Value::from(min_completed)),
+                ("selected_language", Value::from(selected_language)),
 
             ]
         );
@@ -410,8 +410,8 @@ impl<'a> MusixAbgleich<'a> {
         let parameters = HashMap::from(
             [
                 ("track_mbid", Value::from(id)),
-                ("min_completed", Value::from(min_completed))
-                ("selected_language", Value::from(selected_language))
+                ("min_completed", Value::from(min_completed)),
+                ("selected_language", Value::from(selected_language)),
 
             ]
         );
@@ -595,6 +595,56 @@ impl<'a> MusixAbgleich<'a> {
         ); 
 
         self.default_request_handler("matcher.subtitle.get", parameters).await
+    }
+
+    //----------------------------------------------------------------- 
+    
+    /// Get a translated subtitle for a given language.
+    ///
+    /// # Parameters
+    /// `selected_language`: The language of the translated lyrics (ISO 639-1).
+    /// `min_completed`: A value between 0 and 1. If present, only the tracks with a translation ratio over this specific value, for a given language, are returned. Set it to 1 for completed translation only, or to 0.7 for a minimum of 70% complete translation.
+    /// `commontrack_id`: The Musixmatch commontrack ID.
+    /// `f_subtitle_length`: The desired length of the subtitle in seconds.
+    /// `f_subtitle_length_max_deviation`: The maximum deviation allowed from the f_subtitle_length in seconds.
+    pub async fn track_subtitle_translations_with_commontrack_id(&self, id: &str,min_completed : Option<f32> /*percent*/,selected_language : Option<&str>/* (ISO 639-1) */,subtitle_length/*seconds*/ : Option<u16>,max_deviation : Option<u8> /*seconds*/)-> Option<Subtitle> {
+        let parameters = HashMap::from(
+            [
+                ("commontrack_id", Value::from(id)),
+                ("min_completed", Value::from(min_completed)),
+                ("selected_language", Value::from(selected_language)),
+                ("f_subtitle_length", Value::from(subtitle_length)),
+                ("f_subtitle_length_max_deviation", Value::from(max_deviation)),
+
+            ]
+        );
+        self.default_request_handler::<Value>("track.subtitle.translation.get", parameters).await.and_then(|value|{
+            Some(from_value(*value.get("subtitle_translated").unwrap()))
+        })
+    }
+
+    /// Get a translated subtitle for a given language.
+    ///
+    /// # Parameters
+    /// `selected_language`: The language of the translated lyrics (ISO 639-1).
+    /// `min_completed`: A value between 0 and 1. If present, only the tracks with a translation ratio over this specific value, for a given language, are returned. Set it to 1 for completed translation only, or to 0.7 for a minimum of 70% complete translation.
+    /// `track_isrc`: A valid ISRC identifier.
+    /// `f_subtitle_length`: The desired length of the subtitle in seconds.
+    /// `f_subtitle_length_max_deviation`: The maximum deviation allowed from the f_subtitle_length in seconds.
+    pub async fn track_subtitle_translations_with_track_isrc(&self, id: &str,min_completed : Option<f32> /*percent*/,selected_language : Option<&str>/* (ISO 639-1) */,subtitle_length/*seconds*/ : Option<u16>,max_deviation : Option<u8> /*seconds*/)-> Option<Subtitle> {
+        let parameters = HashMap::from(
+            [
+                ("track_isrc", Value::from(id)),
+                ("min_completed", Value::from(min_completed)),
+                ("selected_language", Value::from(selected_language)),
+                ("f_subtitle_length", Value::from(subtitle_length)),
+                ("f_subtitle_length_max_deviation", Value::from(max_deviation)),
+
+            ]
+        );
+        self.default_request_handler::<Value>("track.subtitle.translation.get", parameters).await.and_then(|value|{
+            Some(from_value(*value.get("subtitle_translated").unwrap()))
+        })
     }
 
     //----------------------------------------------------------------- 
