@@ -30,14 +30,14 @@ Add this to your `Cargo.toml` for default features:
 
 ```toml
 [dependencies]
-musixmatch = "0.1.0" # Note version at time of writing
+musixmatch = "0.1.1" # Note version at time of writing
 ```
 
 With the `marocs` feature enabled, you can use default arguments for methods in the MusixAbgleich API. This allows you to omit certain parameters and have them set to default values automatically (None).
 
 ```toml
 [dependencies]
-musixmatch = { version = "0.1.0", features = ["marcos"] } # Note version at time of writing
+musixmatch = { version = "0.1.1", features = ["marcos"] } # Note version at time of writing
 ```
 
 ## Usage
