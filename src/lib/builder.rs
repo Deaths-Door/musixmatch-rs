@@ -1,4 +1,4 @@
-use api_request_utils_rs::ParameterHashMap;
+use api_request_utils::ParameterHashMap;
 
 use crate::SortBy;
 

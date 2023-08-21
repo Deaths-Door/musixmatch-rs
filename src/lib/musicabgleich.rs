@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use api_request_utils_rs::{
+use api_request_utils::{
     RequestInfo,
     RequestModifiers,
     RequestDefaults,
@@ -57,6 +57,7 @@ impl RequestDefaults for MusixAbgleich<'_> {
 
 impl RequestHandler for MusixAbgleich<'_> {}
 
+/*
 /// At this moment these endpoints are not implemented 
 /// * catalogue.dump.get 
 /// * work.post 
@@ -684,4 +685,4 @@ impl<'a> MusixAbgleich<'a> {
             Some(value.get("url").unwrap().as_str().unwrap().to_string())
         })
     }
-}
+}*/

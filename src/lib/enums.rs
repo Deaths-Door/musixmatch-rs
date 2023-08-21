@@ -1,6 +1,7 @@
 use strum::Display;
-use api_request_utils_rs::serde_json::Value;
+use api_request_utils::serde_json::Value;
 
+#[derive(Clone, PartialEq, PartialOrd, Eq, Ord, Debug, Hash)]
 #[derive(Display)]
 pub enum Chart {
     #[strum(serialize = "top")]
@@ -13,6 +14,7 @@ pub enum Chart {
     MxmWeeklyNewMostViewedLyricsLast7DaysNewReleasesOnly,
 }
 
+#[derive(Clone, PartialEq, PartialOrd, Eq, Ord, Debug, Hash)]
 #[derive(Display)]
 pub enum SubtitleFormat {
     #[strum(serialize = "lrc")]
@@ -23,6 +25,7 @@ pub enum SubtitleFormat {
     Stledu,
 }
 
+#[derive(Clone, PartialEq, PartialOrd, Eq, Ord, Debug, Hash)]
 #[derive(Display)]
 pub enum SortBy {
     #[strum(serialize = "asc")]

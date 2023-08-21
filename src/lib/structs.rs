@@ -1,16 +1,16 @@
 #![allow(dead_code)]
 
-use api_request_utils_rs::serde::{Deserialize,Serialize};
+use api_request_utils::serde::{Deserialize,Serialize};
 
-#[derive(Deserialize, Serialize, Debug, PartialEq, PartialOrd )]
-#[serde(crate = "api_request_utils_rs::serde")] // must be below the derive attribute
+#[derive(Deserialize, Serialize, Debug, PartialEq, PartialOrd,Clone )]
+#[serde(crate = "api_request_utils::serde")] // must be below the derive attribute
 pub struct Translation {
     pub language : String,
     pub translation : String
 }
 
-#[derive(Deserialize, Serialize, Debug, PartialEq,PartialOrd )]
-#[serde(crate = "api_request_utils_rs::serde")] // must be below the derive attribute
+#[derive(Deserialize, Serialize, Debug, PartialEq,PartialOrd,Clone )]
+#[serde(crate = "api_request_utils::serde")] // must be below the derive attribute
 pub struct Artist {
     #[serde(rename="artist_id")]
     pub id : u16,
@@ -49,8 +49,8 @@ pub struct Artist {
     pub end_data : String,
 }
 
-#[derive(Deserialize, Serialize, Debug, PartialEq,PartialOrd )]
-#[serde(crate = "api_request_utils_rs::serde")] // must be below the derive attribute
+#[derive(Deserialize, Serialize, Debug, PartialEq,PartialOrd ,Clone)]
+#[serde(crate = "api_request_utils::serde")] // must be below the derive attribute
 pub struct Track {
     
     #[serde(rename = "track_id")]
@@ -114,8 +114,8 @@ pub struct Track {
     pub translated_names: Vec<Translation>,
 }
 
-#[derive(Deserialize, Serialize, Debug, PartialEq,PartialOrd )]
-#[serde(crate = "api_request_utils_rs::serde")] // must be below the derive attribute
+#[derive(Deserialize, Serialize, Debug, PartialEq,PartialOrd ,Clone)]
+#[serde(crate = "api_request_utils::serde")] // must be below the derive attribute
 pub struct Genre {
     #[serde(rename = "music_genre_id")]
     pub id: u32,
@@ -129,8 +129,8 @@ pub struct Genre {
     pub vanity: String
 }
 
-#[derive(Deserialize, Serialize, Debug, PartialEq,PartialOrd )]
-#[serde(crate = "api_request_utils_rs::serde")] // must be below the derive attribute
+#[derive(Deserialize, Serialize, Debug, PartialEq,PartialOrd ,Clone)]
+#[serde(crate = "api_request_utils::serde")] // must be below the derive attribute
 pub struct Lyrics {
     #[serde(rename = "lyrics_id")]
     pub id: u32,
@@ -166,29 +166,29 @@ pub struct Lyrics {
     pub updated_time: String,
 }
 
-#[derive(Deserialize, Serialize, Debug, PartialEq,PartialOrd )]
-#[serde(crate = "api_request_utils_rs::serde")] // must be below the derive attribute
+#[derive(Deserialize, Serialize, Debug, PartialEq,PartialOrd ,Clone)]
+#[serde(crate = "api_request_utils::serde")] // must be below the derive attribute
 pub struct LyricMood {
     pub mood_list: Vec<Mood>,
     pub raw_data: RawData,
 }
 
-#[derive(Deserialize, Serialize, Debug, PartialEq,PartialOrd )]
-#[serde(crate = "api_request_utils_rs::serde")] // must be below the derive attribute
+#[derive(Deserialize, Serialize, Debug, PartialEq,PartialOrd ,Clone)]
+#[serde(crate = "api_request_utils::serde")] // must be below the derive attribute
 pub struct Mood {
     pub label: String,
     pub value: f32,
 }
 
-#[derive(Deserialize, Serialize, Debug, PartialEq,PartialOrd )]
-#[serde(crate = "api_request_utils_rs::serde")] // must be below the derive attribute
+#[derive(Deserialize, Serialize, Debug, PartialEq,PartialOrd,Clone )]
+#[serde(crate = "api_request_utils::serde")] // must be below the derive attribute
 pub struct RawData {
     pub valence: f32,
     pub arousal: f32,
 }
 
-#[derive(Deserialize, Serialize, Debug, PartialEq,PartialOrd )]
-#[serde(crate = "api_request_utils_rs::serde")] // must be below the derive attribute
+#[derive(Deserialize, Serialize, Debug, PartialEq,PartialOrd,Clone )]
+#[serde(crate = "api_request_utils::serde")] // must be below the derive attribute
 pub struct Snippet {
     #[serde(rename = "snippet_language")]
     pub language: String,
@@ -210,8 +210,8 @@ pub struct Snippet {
     pub updated_time: String,
 }
 
-#[derive(Deserialize, Serialize, Debug, PartialEq,PartialOrd )]
-#[serde(crate = "api_request_utils_rs::serde")] // must be below the derive attribute
+#[derive(Deserialize, Serialize, Debug, PartialEq,PartialOrd ,Clone)]
+#[serde(crate = "api_request_utils::serde")] // must be below the derive attribute
 pub struct Subtitle {
     #[serde(rename = "subtitle_id")]
     pub subtitle_id: u32,
@@ -225,8 +225,8 @@ pub struct Subtitle {
     pub lyrics_copyright: String,
 }
 
-#[derive(Deserialize, Serialize, Debug, PartialEq,PartialOrd )]
-#[serde(crate = "api_request_utils_rs::serde")] // must be below the derive attribute
+#[derive(Deserialize, Serialize, Debug, PartialEq,PartialOrd ,Clone)]
+#[serde(crate = "api_request_utils::serde")] // must be below the derive attribute
 pub struct Album {
     #[serde(rename = "album_id")]
     pub id: u32,
@@ -258,8 +258,8 @@ pub struct Album {
     pub updated_time: String,
 }
 
-#[derive(Deserialize, Serialize, Debug, PartialEq,PartialOrd )]
-#[serde(crate = "api_request_utils_rs::serde")] // must be below the derive attribute
+#[derive(Deserialize, Serialize, Debug, PartialEq,PartialOrd ,Clone)]
+#[serde(crate = "api_request_utils::serde")] // must be below the derive attribute
 pub struct ExternalIdentities {
     pub spotify: Vec<String>,
     pub itunes: Vec<String>,
