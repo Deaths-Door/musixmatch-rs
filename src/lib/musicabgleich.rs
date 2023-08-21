@@ -63,6 +63,16 @@ impl RequestHandler for MusixAbgleich<'_> {}
 /// * work.validity.post 
 /// * track.richsync 
 impl<'a> MusixAbgleich<'a> {
+    /// Constructs a new instance of the MusixAbgleich type.
+    ///
+    /// This function creates a new MusixAbgleich instance with the provided API key and error resolver.
+    /// The MusixAbgleich type is designed for making API requests and handling errors using a client.
+    ///
+    /// # Arguments
+    ///
+    /// * `api_key` - A reference to a string representing the API key used for authentication.
+    /// * `error_resolver` - This is responsible for handling errors that occur during API requests.
+    ///
     pub fn new(api_key : &'a str,error_resolver : &'a dyn Fn(&RequestError<Value>)) -> Self {
         MusixAbgleich { client : Client::new(),api_key : api_key,error_resolver : Box::new(error_resolver) }
     }
