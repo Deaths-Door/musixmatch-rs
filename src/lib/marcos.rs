@@ -227,3 +227,8 @@ default_args!{
         musicabgleich.search_track(query).await
     }
 }
+
+#[cfg(test)]
+mod tests {
+    
+}

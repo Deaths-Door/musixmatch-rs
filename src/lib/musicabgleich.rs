@@ -58,7 +58,10 @@ impl RequestDefaults for MusixAbgleich<'_> {
 impl RequestHandler for MusixAbgleich<'_> {}
 
 /// At this moment these endpoints are not implemented 
-/// - catalogue.dump.get / work.post / work.validity.post / track.richsync / 
+/// * catalogue.dump.get 
+/// * work.post 
+/// * work.validity.post 
+/// * track.richsync 
 impl<'a> MusixAbgleich<'a> {
     pub fn new(api_key : &'a str,error_resolver : &'a dyn Fn(&RequestError<Value>)) -> Self {
         MusixAbgleich { client : Client::new(),api_key : api_key,error_resolver : Box::new(error_resolver) }
@@ -85,27 +88,6 @@ impl<'a> MusixAbgleich<'a> {
     /// * `country` - A valid country code (default: "US").
     /// * `page` - The page number for paginated results.
     /// * `page_size` - The page size for paginated results. Range is 1 to 100.
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// # use musixmatch::top_artists_by_country;
-    /// #
-    /// # #[tokio::main]
-    /// # async fn main() {
-    ///     let artists = top_artists_by_country(Some("IT"), Some(1), Some(3)).await;
-    ///     match artists {
-    ///         Some(artists) => {
-    ///             for artist in artists {
-    ///                 println!("{}", artist.name);
-    ///             }
-    ///         }
-    ///         None => {
-    ///             println!("No artists found.");
-    ///         }
-    ///     }
-    /// # }
-    /// ```
     pub async fn top_artists_by_country(&self,country : Option<&str>,page : Option<u16>,page_size : Option<u8>) -> Option<Vec<Artist>> {
         let parameters = HashMap::from(
             [
@@ -127,33 +109,6 @@ impl<'a> MusixAbgleich<'a> {
     /// * `has_lyrics` - When set, filter only contents with lyrics.
     /// * `page` - The page number for paginated results.
     /// * `page_size` - The page size for paginated results. Range is 1 to 100.
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// # use musixmatch::{top_tracks_by_country, Chart};
-    /// #
-    /// # #[tokio::main]
-    /// # async fn main() {
-    ///     let tracks = top_tracks_by_country(
-    ///         Some("IT"),
-    ///         Some(Chart::Top),
-    ///         Some(true),
-    ///         Some(1),
-    ///         Some(5),
-    ///     ).await;
-    ///     match tracks {
-    ///         Some(tracks) => {
-    ///             for track in tracks {
-    ///                 println!("{}", track.name);
-    ///             }
-    ///         }
-    ///         None => {
-    ///             println!("No tracks found.");
-    ///         }
-    ///     }
-    /// # }
-    /// ```
     pub async fn top_tracks_by_country(&self,country : Option<&str>,chart_name : Option<Chart>,has_lyrics : Option<bool>,page : Option<u16>,page_size : Option<u8>) -> Option<Vec<Track>> {
         let parameters = HashMap::from(
             [
@@ -204,27 +159,6 @@ impl<'a> MusixAbgleich<'a> {
     /// - `title`: Optional. The song title.
     /// - `artist`: Optional. The song artist.
     /// - `album`: Optional. The song album.
-    ///
-    /// # Authentication
-    ///
-    /// This method requires authentication.
-    ///
-    /// # Examples
-    ///
-    /// Match a song by title and artist:
-    /// ```
-    /// # use musixmatch::MusixAbgleich;
-    /// # #[tokio::main]
-    /// # async fn main() {
-    /// # let api = MusixAbgleich::new("YOUR_API_KEY");
-    /// let track = api.track(Some("Lose Yourself"), Some("Eminem"), None).await;
-    /// if let Some(track) = track {
-    ///     println!("Matched Track: {} by {}", track.title, track.artist_name);
-    /// } else {
-    ///     println!("No match found.");
-    /// }
-    /// # }
-    /// ```
     pub async fn track(&self,title : Option<&str>,artist : Option<&str>,album : Option<&str>) -> Option<Track> {
         let parameters = HashMap::from(
             [
@@ -241,13 +175,6 @@ impl<'a> MusixAbgleich<'a> {
     /// # Arguments
     ///
     /// * `id` - The Musixmatch commontrack_id.
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// let id = 5920049;
-    /// let track = musixmatch.track_with_commontrack_id(id).await;
-    /// ```
     pub async fn track_with_commontrack_id(&self, id: u32) -> Option<Track> {
         let parameters = HashMap::from( [ ("commontrack_id", Value::from(id)) ] );
         self.default_request_handler("track.get", parameters).await
@@ -258,13 +185,6 @@ impl<'a> MusixAbgleich<'a> {
     /// # Arguments
     ///
     /// * `isrc` - A valid ISRC identifier.
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// let isrc = "USABC1234567";
-    /// let track = musixmatch.track_with_track_isrc(isrc).await;
-    /// ```
     pub async fn track_with_track_isrc(&self, isrc: &str) -> Option<Track> {
         let parameters = HashMap::from([("track_isrc", Value::from(isrc))]);
         self.default_request_handler("track.get", parameters).await
@@ -280,23 +200,6 @@ impl<'a> MusixAbgleich<'a> {
     /// # Parameters
     ///
     /// - `isrc`: The ISRC identifier of the track.
-    ///
-    /// # Examples
-    ///
-    /// Get the lyrics for a track by its ISRC:
-    /// ```
-    /// # use musixmatch::MusixAbgleich;
-    /// # #[tokio::main]
-    /// # async fn main() {
-    /// # let api = MusixAbgleich::new("YOUR_API_KEY");
-    /// let lyrics = api.track_lyrics_with_track_isrc("USAT21812220").await;
-    /// if let Some(lyrics) = lyrics {
-    ///     println!("Lyrics: {}", lyrics.lyrics_body);
-    /// } else {
-    ///     println!("No lyrics found.");
-    /// }
-    /// # }
-    /// ```
     pub async fn track_lyrics_with_track_isrc(&self,isrc: &str) -> Option<Lyrics> {
         let parameters = HashMap::from([("track_isrc",Value::from(isrc))]);
         self.default_request_handler("matcher.lyrics.get", parameters).await
@@ -311,23 +214,6 @@ impl<'a> MusixAbgleich<'a> {
     ///
     /// - `title`: Optional. The song title.
     /// - `artist`: Optional. The song artist.
-    ///
-    /// # Examples
-    ///
-    /// Get the lyrics for a track by title and artist:
-    /// ```
-    /// # use musixmatch::MusixAbgleich;
-    /// # #[tokio::main]
-    /// # async fn main() {
-    /// # let api = MusixAbgleich::new("YOUR_API_KEY");
-    /// let lyrics = api.track_lyrics(Some("Sexy and I Know It"), Some("LMFAO")).await;
-    /// if let Some(lyrics) = lyrics {
-    ///     println!("Lyrics: {}", lyrics.lyrics_body);
-    /// } else {
-    ///     println!("No lyrics found.");
-    /// }
-    /// # }
-    /// ```
     pub async fn track_lyrics(&self,title : Option<&str>,artist : Option<&str>) -> Option<Lyrics> {
         let parameters = HashMap::from(
             [
@@ -343,13 +229,6 @@ impl<'a> MusixAbgleich<'a> {
     /// # Arguments
     ///
     /// * `id` - The Musixmatch commontrack_id.
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// let id = "5920049";
-    /// let lyrics = musixmatch.track_lyrics_with_commontrack_id(id).await;
-    /// ```
     pub async fn track_lyrics_with_commontrack_id(&self, id: &str) -> Option<Lyrics> {
         let parameters = HashMap::from([("commontrack_id", Value::from(id))]);
         self.default_request_handler("track.lyrics.get", parameters).await
@@ -360,13 +239,6 @@ impl<'a> MusixAbgleich<'a> {
     /// # Arguments
     ///
     /// * `id` - The Musixmatch track_id.
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// let id = "15953433";
-    /// let lyrics = musixmatch.track_lyrics_with_track_id(id).await;
-    /// ```
     pub async fn track_lyrics_with_track_id(&self, id: &str) -> Option<Lyrics> {
         let parameters = HashMap::from([("track_id", Value::from(id))]);
         self.default_request_handler("track.lyrics.get", parameters).await
@@ -454,13 +326,6 @@ impl<'a> MusixAbgleich<'a> {
     /// # Arguments
     ///
     /// * `id` - The Musixmatch commontrack_id.
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// let id = "5920049";
-    /// let mood = musixmatch.track_lyrics_mood_with_commontrack_id(id).await;
-    /// ```
     pub async fn track_lyrics_mood_with_commontrack_id(&self, id: &str) -> Option<Lyrics> {
         let parameters = HashMap::from([("commontrack_id", Value::from(id))]);
         self.default_request_handler("track.lyrics.mood.get", parameters).await
@@ -471,13 +336,6 @@ impl<'a> MusixAbgleich<'a> {
     /// # Arguments
     ///
     /// * `isrc` - A valid ISRC identifier.
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// let isrc = "US123456789";
-    /// let mood = musixmatch.track_lyrics_mood_with_track_isrc(isrc).await;
-    /// ```
     pub async fn track_lyrics_mood_with_track_isrc(&self, isrc: &str) -> Option<LyricMood> {
         let parameters = HashMap::from([("track_isrc", Value::from(isrc))]);
         self.default_request_handler("track.lyrics.mood.get", parameters).await
@@ -494,21 +352,6 @@ impl<'a> MusixAbgleich<'a> {
     /// # Parameters
     ///
     /// - `track_id`: The musiXmatch track ID.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use musixmatch::MusixMatch;
-    /// #
-    /// # #[tokio::main]
-    /// # async fn main() {
-    /// #     let musixmatch = MusixMatch::new("your_api_key");
-    /// #
-    /// #     let track_id = 16860631;
-    /// #     let snippet = musixmatch.track_snippet(track_id).await;
-    /// #     println!("{:?}", snippet);
-    /// # }
-    /// ```
     pub async fn track_snippet(&self, track_id: u32) -> Option<Snippet> {
         let parameters = HashMap::from([("track_id", Value::from(track_id))]);
         self.default_request_handler("track.snippet.get", parameters).await
@@ -527,28 +370,6 @@ impl<'a> MusixAbgleich<'a> {
     /// - `subtitle_length`: Optional. The desired length of the subtitle in seconds.
     /// - `max_deviation`: Optional. The maximum deviation allowed from the desired subtitle length in seconds.
     /// - `format`: Optional. The format of the subtitle (LRC, DFXP, STLEDU). Defaults to LRC.
-    ///
-    /// # Authentication
-    ///
-    /// This method requires authentication with an API key and a commercial plan.
-    ///
-    /// # Examples
-    ///
-    /// Get a subtitle in LRC format for a track:
-    /// ```
-    /// # use musixmatch::MusixAbgleich;
-    /// # use musixmatch::SubtitleFormat;
-    /// # #[tokio::main]
-    /// # async fn main() {
-    /// # let api = MusixAbgleich::new("YOUR_API_KEY");
-    /// let subtitle = api.track_subtitle(10074988, Some(120), Some(5), Some(SubtitleFormat::LRC)).await;
-    /// if let Some(subtitle) = subtitle {
-    ///     println!("Subtitle: {}", subtitle.subtitle_body);
-    /// } else {
-    ///     println!("No subtitle found.");
-    /// }
-    /// # }
-    /// ```
     pub async fn track_subtitle(&self,commontrack_id : u32,subtitle_length/*seconds*/ : Option<u16>,max_deviation : Option<u8> /*seconds*/,format : Option<SubtitleFormat>) -> Option<Subtitle> {
         let parameters = HashMap::from(
             [
@@ -583,35 +404,6 @@ impl<'a> MusixAbgleich<'a> {
     /// - `album`: Optional. The song album.
     /// - `subtitle_length`: Optional. Filter by subtitle length in seconds.
     /// - `max_deviation`: Optional. Max deviation for a subtitle length in seconds.
-    ///
-    /// # Authentication
-    ///
-    /// This method requires authentication with an API key and a commercial plan.
-    ///
-    /// # Examples
-    ///
-    /// Get the subtitles for a song:
-    /// ```
-    /// # use musixmatch::MusixAbgleich;
-    /// # #[tokio::main]
-    /// # async fn main() {
-    /// # let api = MusixAbgleich::new("YOUR_API_KEY");
-    /// let subtitles = api.subtitle(
-    ///     Some("sexy and i know it"),
-    ///     Some("lmfao"),
-    ///     None,
-    ///     Some(200),
-    ///     Some(3),
-    /// ).await;
-    /// if let Some(subtitles) = subtitles {
-    ///     for subtitle in subtitles {
-    ///         println!("Subtitle: {}", subtitle.subtitle_body);
-    ///     }
-    /// } else {
-    ///     println!("No subtitles found.");
-    /// }
-    /// # }
-    /// ```
     pub async fn subtitle(&self,title : Option<&str>,artist : Option<&str>,album : Option<&str>,subtitle_length/*seconds*/ : Option<u16>,max_deviation : Option<u8> /*seconds*/) -> Option<Track> {
         let parameters = HashMap::from(
             [
@@ -705,24 +497,6 @@ impl<'a> MusixAbgleich<'a> {
     /// # Parameters
     ///
     /// - `id`: The Musixmatch artist ID
-    ///
-    /// # Examples
-    ///
-    /// Get the artist data for the artist with Musixmatch ID 118:
-    /// ```
-    /// # use musixmatch::MusixAbgleich;
-    /// # #[tokio::main]
-    /// # async fn main() {
-    /// # let api = MusixAbgleich::new("YOUR_API_KEY");
-    /// let artist_data = api.artist_with_musixmatch_id(118).await;
-    /// if let Some(artist_data) = artist_data {
-    ///     // Process artist data
-    ///     println!("Artist Data: {:?}", artist_data);
-    /// } else {
-    ///     println!("Artist data not found.");
-    /// }
-    /// # }
-    /// ```
     pub async fn artist_with_musixmatch_id(&self,id : u32) -> Option<Artist> {
         let parameters = HashMap::from([("artist_id",Value::from(id))]);
         self.default_request_handler("artist.get", parameters).await
@@ -733,24 +507,6 @@ impl<'a> MusixAbgleich<'a> {
     /// # Parameters
     ///
     /// - `id`: The Musicbrainz artist ID.
-    ///
-    /// # Examples
-    ///
-    /// Get the artist data for the artist with Musicbrainz ID 118:
-    /// ```
-    /// # use musixmatch::MusixAbgleich;
-    /// # #[tokio::main]
-    /// # async fn main() {
-    /// # let api = MusixAbgleich::new("YOUR_API_KEY");
-    /// let artist_data = api.artist_with_musixbrainz_id(118).await;
-    /// if let Some(artist_data) = artist_data {
-    ///     // Process artist data
-    ///     println!("Artist Data: {:?}", artist_data);
-    /// } else {
-    ///     println!("Artist data not found.");
-    /// }
-    /// # }
-    /// ```
     pub async fn artist_with_musixbrainz_id(&self,id : u32) -> Option<Artist> {
         let parameters = HashMap::from([("artist_mbid",Value::from(id))]);
         self.default_request_handler("artist.get", parameters).await
@@ -846,24 +602,6 @@ impl<'a> MusixAbgleich<'a> {
     /// # Parameters
     ///
     /// - `id`: The Musixmatch album ID.
-    ///
-    /// # Examples
-    ///
-    /// Get the album data for the album with Musixmatch ID 14250417:
-    /// ```
-    /// # use musixmatch::MusixAbgleich;
-    /// # #[tokio::main]
-    /// # async fn main() {
-    /// # let api = MusixAbgleich::new("YOUR_API_KEY");
-    /// let album_data = api.album(14250417).await;
-    /// if let Some(album_data) = album_data {
-    ///     // Process album data
-    ///     println!("Album Data: {:?}", album_data);
-    /// } else {
-    ///     println!("Album data not found.");
-    /// }
-    /// # }
-    /// ```
     pub async fn album(&self,id : u32) -> Option<Album> {
         let parameters = HashMap::from([("album_id",Value::from(id))]);
         self.default_request_handler("album.get", parameters).await
@@ -912,29 +650,6 @@ impl<'a> MusixAbgleich<'a> {
     //----------------------------------------------------------------- 
 
     /// Get the list of music genres in the catalogue.
-    ///
-    /// # Authentication
-    ///
-    /// This method requires authentication.
-    ///
-    /// # Examples
-    ///
-    /// Get the list of all genres:
-    /// ```
-    /// # use musixmatch::MusixAbgleich;
-    /// # #[tokio::main]
-    /// # async fn main() {
-    /// # let api = MusixAbgleich::new("YOUR_API_KEY");
-    /// let genres = api.genres().await;
-    /// if let Some(genres) = genres {
-    ///     for genre in genres {
-    ///         println!("Genre: {}", genre.genre_name);
-    ///     }
-    /// } else {
-    ///     println!("No genres found.");
-    /// }
-    /// # }
-    /// ```
     pub async fn genres(&self) -> Option<Vec<Genre>> {
         let parameters = HashMap::new();
         self.default_request_handler("music.genres.get", parameters).await
