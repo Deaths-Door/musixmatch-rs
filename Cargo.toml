@@ -18,7 +18,7 @@ path = "src/lib/mod.rs"
 marcos = ["dep:default-args"]
 
 [dependencies]
-api-request-utils-rs =  "0.2.2"
+api-request-utils-rs =  "0.2.3"
 # Cuz im lazy 
 strum = { version = "0.25", features = ["derive"] }
 

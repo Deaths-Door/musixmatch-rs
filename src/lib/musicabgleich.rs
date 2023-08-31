@@ -15,6 +15,7 @@ use api_request_utils::{
         from_value
     },
     ParameterHashMap, 
+    ErrorHandler
 };
 
 use crate::{
@@ -37,19 +38,20 @@ use crate::{
 pub struct MusixAbgleich<'a> {
     client : Client,
     api_key : &'a str, 
-    error_resolver : Box<&'a dyn Fn(&RequestError<Value>)>
+    error_resolver : &'a ErrorHandler<Value>
 }
 
 impl RequestInfo for MusixAbgleich<'_> {
     const BASE_URL : &'static str = "https://api.musixmatch.com/ws/1.1";
+    
+    fn client(&self) -> &Client {
+        &self.client
+    }
 }
 
 impl RequestModifiers for MusixAbgleich<'_> {}
 
 impl RequestDefaults for MusixAbgleich<'_> { 
-    fn client(&self) -> &Client {
-        &self.client
-    }
     fn default_parameters(&self,request_builder: RequestBuilder) -> RequestBuilder {
         request_builder.query(&[("apikey", self.api_key)])
     }
@@ -57,7 +59,6 @@ impl RequestDefaults for MusixAbgleich<'_> {
 
 impl RequestHandler for MusixAbgleich<'_> {}
 
-/*
 /// At this moment these endpoints are not implemented 
 /// * catalogue.dump.get 
 /// * work.post 
@@ -74,23 +75,9 @@ impl<'a> MusixAbgleich<'a> {
     /// * `api_key` - A reference to a string representing the API key used for authentication.
     /// * `error_resolver` - This is responsible for handling errors that occur during API requests.
     ///
-    pub fn new(api_key : &'a str,error_resolver : &'a dyn Fn(&RequestError<Value>)) -> Self {
-        MusixAbgleich { client : Client::new(),api_key : api_key,error_resolver : Box::new(error_resolver) }
+    pub fn new(api_key : &'a str,error_resolver : &'a ErrorHandler<Value>) -> Self {
+        MusixAbgleich { client : Client::new(),api_key : api_key,error_resolver }
     }
-
-    async fn default_request_handler<'l,T : api_request_utils_rs::serde::de::DeserializeOwned>(&self,endpoint : &str,parameters : ParameterHashMap<'l>) -> Option<T> {
-        let request = self.default_get_requestor(endpoint,parameters);
-        let response = Self::request::<Value,Value>(request).await;
-        let result = Self::resolve_error(&response,|value| {
-            (self.error_resolver)(&value)
-        });
-
-        result.and_then(|json|{
-            Some(from_value::<T>(json.get("body").unwrap().clone()).unwrap())
-        })
-    }
-    
-   //----------------------------------------------------------------- 
 
     /// Retrieves the top artists by country.
     ///
@@ -107,10 +94,29 @@ impl<'a> MusixAbgleich<'a> {
                 ("page_size",Value::from(page_size))
             ]
         ); 
-        self.default_request_handler("chart.artists.get", parameters).await
+        self.get_request_handler::<Value,Value,Vec<Artist>>("chart.artists.get", &parameters,self.error_resolver,|_|None).await
     }
+}
 
-    /// Retrieves the top tracks by country.
+/*
+
+
+
+    async fn default_request_handler<'l,T : api_request_utils_rs::serde::de::DeserializeOwned>(&self,endpoint : &str,parameters : ParameterHashMap<'l>) -> Option<T> {
+        let request = self.default_get_requestor(endpoint,parameters);
+        let response = Self::request::<Value,Value>(request).await;
+        let result = Self::resolve_error(&response,|value| {
+            (self.error_resolver)(&value)
+        });
+
+        result.and_then(|json|{
+            Some(from_value::<T>(json.get("body").unwrap().clone()).unwrap())
+        })
+    }
+    
+   //----------------------------------------------------------------- 
+
+        /// Retrieves the top tracks by country.
     ///
     /// # Arguments
     ///
