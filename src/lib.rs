@@ -29,3 +29,9 @@ mod client;
 pub use self::structs::*;
 pub use self::enums::*;
 pub use self::client::*;
+
+#[cfg(feature ="marcos")]
+mod macros;
+
+#[cfg(feature ="marcos")]
+pub use self::macros::*;

@@ -31,7 +31,6 @@ use crate::{
     Subtitle,
     Album,
 
-    //TrackSearchQuery
 };
 
 /// Represents a client for accessing the MusicMatch API.
