@@ -11,18 +11,18 @@ homepage = "https://github.com/Deaths-Door/musixmatch-rs"
 license = "MIT OR Apache-2.0"
 keywords = ["musixmatch","api","lyrics","search","music"]
 
-[lib]
-path = "src/lib/mod.rs"
-
 [features]
 marcos = ["dep:default-args"]
 
 [dependencies]
-api-request-utils-rs =  "0.2.3"
-# Cuz im lazy 
+# For API
+api-request-utils-rs =  "0.2.5"
+
+# For enums From and Display Traits
 strum = { version = "0.25", features = ["derive"] }
 
-#marocs feature
-default-args = { version = "1.0.0" , optional = true }
+# For getters and setters for structs 
+getset = "0.1.2"
 
-[dev-dependencies]
+# For Macros Features
+default-args = { version = "1.0.0" , optional = true }

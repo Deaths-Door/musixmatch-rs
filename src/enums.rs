@@ -1,3 +1,5 @@
+#![allow(missing_docs)]
+
 use strum::Display;
 use api_request_utils::serde_json::Value;
 
