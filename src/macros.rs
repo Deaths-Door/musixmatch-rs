@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 use default_args::default_args;
 
 use crate::{
@@ -12,7 +13,9 @@ use crate::{
     Track,
     Lyrics,
     Subtitle,
-    Album
+    Album,
+
+    TrackSearchQuery
 };
 
 
@@ -128,4 +131,48 @@ default_args! {
     export async fn album_tracks_with_musixbrainz_id(musicabgleich : &MusixAbgleich<'_>, id: u32 , has_lyrics: Option<bool> = None, page: Option<u32> = None, page_size: Option<u8> = None) -> Option<Vec<Track>> {
         musicabgleich.album_tracks_with_musixbrainz_id(id,has_lyrics,page,page_size).await
     }     
+}
+
+default_args!{
+    export async fn search_track(
+        musicabgleich : &MusixAbgleich<'_>,
+        song_title: Option<&str>,
+        song_artist: Option<&str>,
+        lyrics_contain_word: Option<&str>,
+        song_title_or_artist_contains_word: Option<&str>,
+        search_writers: Option<&str>,
+        search_all_contains_word: Option<&str>,
+        artist_id: Option<u32>,
+        music_genre_id: Option<u32>,
+        lyrics_language: Option<&str>,
+        has_lyrics: Option<bool>,
+        track_release_group_first_release_date_min: Option<&str>,
+        track_release_group_first_release_date_max: Option<&str>,
+        artist_rating: Option<SortBy>,
+        track_rating: Option<SortBy>,
+        quorum_factor: Option<f32>,
+        page: Option<u8>,
+        page_size: Option<u32>
+    ) -> Option<Track> {
+        let query = TrackSearchQuery::new()
+            .song_title(song_title)
+            .song_artist(song_artist)
+            .lyrics_contain_word(lyrics_contain_word)
+            .song_title_or_artist_contains_word(song_title_or_artist_contains_word)
+            .search_writers(search_writers)
+            .search_all_contains_word(search_all_contains_word)
+            .artist_id(artist_id)
+            .music_genre_id(music_genre_id)
+            .lyrics_language(lyrics_language)
+            .has_lyrics(has_lyrics)
+            .track_release_group_first_release_date_min(track_release_group_first_release_date_min)
+            .track_release_group_first_release_date_max(track_release_group_first_release_date_max)
+            .artist_rating(artist_rating)
+            .track_rating(track_rating)
+            .quorum_factor(quorum_factor)
+            .page(page)
+            .page_size(page_size);
+
+        musicabgleich.search_track(query).await
+    }
 }

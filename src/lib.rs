@@ -6,7 +6,7 @@
     unused_imports,
     unused_variables,
     unused_mut,
-    unused_results,
+
     unused_allocation,
     unused_must_use,
     
@@ -19,16 +19,18 @@
     overflowing_literals,
 )]
 
-#![deny(missing_docs)]
+#![deny(missing_docs,unused_results)]
 
 
 mod structs;
 mod enums;
 mod client;
+mod builder;
 
 pub use self::structs::*;
 pub use self::enums::*;
 pub use self::client::*;
+pub use self::builder::*;
 
 #[cfg(feature ="marcos")]
 mod macros;

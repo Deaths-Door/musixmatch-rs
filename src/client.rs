@@ -31,6 +31,7 @@ use crate::{
     Subtitle,
     Album,
 
+    TrackSearchQuery
 };
 
 /// Represents a client for accessing the MusicMatch API.
@@ -40,7 +41,7 @@ use crate::{
 pub struct MusixAbgleich<'a> {
     client : Client,
     api_key : &'a str, 
-    error_resolver : Box<dyn Fn(RequestError<Value>) + Sync + Send>
+    error_resolver : &'a (dyn Fn(RequestError<Value>) + Sync + Send)
 }
 
 impl RequestInfo for MusixAbgleich<'_> {
@@ -67,10 +68,6 @@ impl<T,O,E> RequestHandler<T,O,E> for MusixAbgleich<'_> where T : DeserializeOwn
 /// * work.validity.post 
 /// * track.richsync 
 impl<'a> MusixAbgleich<'a> {
-    fn create_map<O : DeserializeOwned>(value_mapper : impl FnOnce(&Value) -> &Value + Send + Sync) -> impl FnOnce(Value) -> O + Send + Sync  {
-        |response : Value| from_value::<O>(value_mapper(response.get("body").unwrap()).clone()).unwrap()
-    }
-
     /// Constructs a new instance of the MusixAbgleich type.
     ///
     /// This function creates a new MusixAbgleich instance with the provided API key and error resolver.
@@ -80,8 +77,12 @@ impl<'a> MusixAbgleich<'a> {
     ///
     /// * `api_key` - A reference to a string representing the API key used for authentication.
     /// * `error_resolver` - This is responsible for handling errors that occur during API requests.
-    pub fn new(api_key : &'a str,error_resolver : impl Fn(RequestError<Value>) + Sync + Send) -> Self {
-        MusixAbgleich { client : Client::new(),api_key : api_key,error_resolver : Box::new(error_resolver)}
+    pub fn new(api_key : &'a str,error_resolver : &'a (dyn Fn(RequestError<Value>) + Sync + Send)) -> Self {
+        MusixAbgleich { client : Client::new(),api_key : api_key,error_resolver }//: Box::new(error_resolver)}
+    }
+
+    fn create_map<O : DeserializeOwned>(value_mapper : impl FnOnce(&Value) -> &Value + Send + Sync) -> impl FnOnce(Value) -> O + Send + Sync  {
+        |response : Value| from_value::<O>(value_mapper(response.get("body").unwrap()).clone()).unwrap()
     }
 
     /// Retrieves the top artists by country.
@@ -630,5 +631,30 @@ impl<'a> MusixAbgleich<'a> {
         let parameters = HashMap::from([("domain",Value::from(domain))]);
         
         self.get_request_handler("tracking.url.get", &parameters,Self::create_map(|value| value.get("url").unwrap()),&self.error_resolver).await
+    }
+
+    /// Search for track in our database.
+    /// 
+    /// # Parameters
+    /// 
+    /// `q_track` : The song title
+    /// `q_artist` : The song artist
+    /// `q_lyrics` : Any word in the lyrics
+    /// `q_track_artist` : Any word in the song title or artist name
+    /// `q_writer` : Search among writers
+    /// `q` : Any word in the song title or artist name or lyrics
+    /// `f_artist_id` : When set, filter by this artist id
+    /// `f_music_genre_i`d : When set, filter by this music category id
+    /// `f_lyrics_language` : Filter by the lyrics language (en,it,..)
+    /// `f_has_lyrics` : When set, filter only contents with lyrics
+    /// `f_track_release_group_first_release_date_min` : When set, filter the tracks with release date newer than value, format is YYYYMMDD
+    /// `f_track_release_group_first_release_date_max` : When set, filter the tracks with release date older than value, format is YYYYMMDD
+    /// `s_artist_rating` : Sort by our popularity index for artists (asc|desc)
+    /// `s_track_rating` : Sort by our popularity index for tracks (asc|desc)
+    /// `quorum_factor` : Search only a part of the given query string.Allowed range is (0.1 – 0.9)
+    /// `page` : Define the page number for paginated results
+    /// `page_size` : Define the page size for paginated results. Range is 1 to 100.
+    pub async fn search_track<'l>(&self,query : TrackSearchQuery<'l>) -> Option<Track> {
+        self.get_request_handler("track.search", &query.0,Self::create_map(|value| value),&self.error_resolver).await
     }
 }
