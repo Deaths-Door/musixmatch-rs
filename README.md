@@ -57,10 +57,9 @@ use musixmatch::MusixAbgleich;
 
 fn main() {
     // Create an instance of MusixAbgleich
-    let musicabgleich = MusixAbgleich::new("your_api_key",||{
-        // Custom error handler for handling status codes 
-        // Look below for possible status codes from music match
-    });
+    let musicabgleich = MusixAbgleich::new("your_api_key",&|error|{
+        // Custom error handler for handling errors 
+    })
 
     // Call methods with default arguments
     let artists = musicabgleich.top_artists_by_country(Some("US"), None, None);
