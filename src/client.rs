@@ -654,7 +654,7 @@ impl<F> MusixAbgleich<F> where F : Fn(RequestError<Value>) + Sync + Send {
     /// `quorum_factor` : Search only a part of the given query string.Allowed range is (0.1 – 0.9)
     /// `page` : Define the page number for paginated results
     /// `page_size` : Define the page size for paginated results. Range is 1 to 100.
-    pub async fn search_track<'l>(&self,query : TrackSearchQuery<'l>) -> Option<Track> {
+    pub async fn search_track(&self,query : TrackSearchQuery) -> Option<Track> {
         self.get_request_handler("track.search", &query.0,Self::create_map(|value| value),&self.error_resolver).await
     }
 }
