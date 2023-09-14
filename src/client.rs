@@ -38,13 +38,13 @@ use crate::{
 ///
 /// The `MusixAbgleich` struct provides the necessary functionality to interact with the
 /// MusicMatch API, including sending requests and handling errors.
-pub struct MusixAbgleich<'a> {
+pub struct MusixAbgleich<F> where F : Fn(RequestError<Value>) + Sync + Send {
     client : Client,
-    api_key : &'a str, 
-    error_resolver : &'a (dyn Fn(RequestError<Value>) + Sync + Send)
+    api_key : &'static str, 
+    error_resolver : F //&'a (dyn Fn(RequestError<Value>) + Sync + Send)
 }
 
-impl RequestInfo for MusixAbgleich<'_> {
+impl<F> RequestInfo for MusixAbgleich<F> where F : Fn(RequestError<Value>) + Sync + Send  {
     const BASE_URL : &'static str = "https://api.musixmatch.com/ws/1.1";
     
     fn client(&self) -> &Client {
@@ -52,22 +52,22 @@ impl RequestInfo for MusixAbgleich<'_> {
     }
 }
 
-impl RequestModifiers for MusixAbgleich<'_> {}
+impl<F> RequestModifiers for MusixAbgleich<F> where F : Fn(RequestError<Value>) + Sync + Send {}
 
-impl RequestDefaults for MusixAbgleich<'_> { 
+impl<F> RequestDefaults for MusixAbgleich<F> where F : Fn(RequestError<Value>) + Sync + Send { 
     fn default_parameters(&self,request_builder: RequestBuilder) -> RequestBuilder {
         request_builder.query(&[("apikey", self.api_key)])
     }
 }
 
-impl<T,O,E> RequestHandler<T,O,E> for MusixAbgleich<'_> where T : DeserializeOwned,O : DeserializeOwned,E : DeserializeOwned {}
+impl<T,O,E,F> RequestHandler<T,O,E> for MusixAbgleich<F> where F : Fn(RequestError<Value>) + Sync + Send  ,T : DeserializeOwned,O : DeserializeOwned,E : DeserializeOwned {}
 
 /// At this moment these endpoints are not implemented 
 /// * catalogue.dump.get 
 /// * work.post 
 /// * work.validity.post 
 /// * track.richsync 
-impl<'a> MusixAbgleich<'a> {
+impl<F> MusixAbgleich<F> where F : Fn(RequestError<Value>) + Sync + Send {
     /// Constructs a new instance of the MusixAbgleich type.
     ///
     /// This function creates a new MusixAbgleich instance with the provided API key and error resolver.
@@ -77,7 +77,7 @@ impl<'a> MusixAbgleich<'a> {
     ///
     /// * `api_key` - A reference to a string representing the API key used for authentication.
     /// * `error_resolver` - This is responsible for handling errors that occur during API requests.
-    pub fn new(api_key : &'a str,error_resolver : &'a (dyn Fn(RequestError<Value>) + Sync + Send)) -> Self {
+    pub fn new(api_key : &'static str,error_resolver : F) -> Self {
         MusixAbgleich { client : Client::new(),api_key : api_key,error_resolver }//: Box::new(error_resolver)}
     }
 
