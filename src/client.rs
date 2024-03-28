@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{borrow::Cow, collections::HashMap};
 
 use api_request_utils::{
     RequestInfo,
@@ -40,7 +40,7 @@ use crate::{
 /// MusicMatch API, including sending requests and handling errors.
 pub struct MusixAbgleich<F> where F : Fn(RequestError<Value>) + Sync + Send {
     client : Client,
-    api_key : &'static str, 
+    api_key: Cow<'static, str>, 
     error_resolver : F //&'a (dyn Fn(RequestError<Value>) + Sync + Send)
 }
 
@@ -56,7 +56,7 @@ impl<F> RequestModifiers for MusixAbgleich<F> where F : Fn(RequestError<Value>) 
 
 impl<F> RequestDefaults for MusixAbgleich<F> where F : Fn(RequestError<Value>) + Sync + Send { 
     fn default_parameters(&self,request_builder: RequestBuilder) -> RequestBuilder {
-        request_builder.query(&[("apikey", self.api_key)])
+        request_builder.query(&[("apikey", &self.api_key)])
     }
 }
 
@@ -77,8 +77,12 @@ impl<F> MusixAbgleich<F> where F : Fn(RequestError<Value>) + Sync + Send {
     ///
     /// * `api_key` - A reference to a string representing the API key used for authentication.
     /// * `error_resolver` - This is responsible for handling errors that occur during API requests.
-    pub fn new(api_key : &'static str,error_resolver : F) -> Self {
-        MusixAbgleich { client : Client::new(),api_key : api_key,error_resolver }//: Box::new(error_resolver)}
+    pub fn new(api_key : impl Into<Cow<'static, str>>,error_resolver : F) -> Self {
+        MusixAbgleich {
+            client : Client::new(),
+            api_key : api_key.into(),
+            error_resolver
+        }//: Box::new(error_resolver)}
     }
 
     fn create_map<O : DeserializeOwned>(value_mapper : impl FnOnce(&Value) -> &Value + Send + Sync) -> impl FnOnce(Value) -> O + Send + Sync  {
