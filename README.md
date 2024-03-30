@@ -55,18 +55,19 @@ To use the MusixMatch API, you need an API key. Follow these steps to obtain an 
 ```rust
 use musixmatch::MusixAbgleich;
 
-fn main() {
+#[tokio::main]
+async fn main() {
     // Create an instance of MusixAbgleich
     let musicabgleich = MusixAbgleich::new("your_api_key",&|error|{
         // Custom error handler for handling errors 
     })
 
     // Call methods with default arguments
-    let artists = musicabgleich.top_artists_by_country(Some("US"), None, None);
+    let artists = musicabgleich.top_artists_by_country(Some("US"), None, None).await;
     println!("{:?}", artists);
 
     //Or when using marcos feature
-    let marco_feature_artist = top_artists_by_country!(musicabgleich,country = "US");
+    let marco_feature_artist = top_artists_by_country!(musicabgleich,country = "US").await;
     println!("{:?}", marco_feature_artist);
 }
 ```
