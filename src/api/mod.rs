@@ -1,14 +1,11 @@
-mod charts;
-mod enums;
-mod structs;
-//mod track;
-mod utils;
+#![cfg_attr(not(test), forbid(unused_mut))]
 
-pub use charts::*;
-pub use enums::*;
+mod charts;
+mod genres;
+mod structs;
+mod tracking;
+
 pub use structs::*;
-//pub use track::*;
-pub use utils::*;
 
 #[cfg(test)]
 mod test_utils {
@@ -20,7 +17,7 @@ mod test_utils {
 
     pub(in crate::api) fn initialize_client(
     ) -> MusixAbgleich<String, impl Fn(RequestError<Value>) -> ()> {
-        use dotenv::dotenv;
+        use dotenvy::dotenv;
 
         dotenv().expect("Failure");
 
@@ -28,19 +25,11 @@ mod test_utils {
 
         MusixAbgleich::builder()
             .api_key(api_key)
-            .error_resolver(|_| ())
+            .error_resolver(|value| eprintln!("{}", value.to_string()))
             .build()
     }
 
     pub(in crate::api) async fn assert_client_test<O>(future: impl Future<Output = Option<O>>) {
         assert!(future.await.is_some())
     }
-
-    /*
-    #[tokio::test]
-            async fn $name() {
-                let client = crate::api::test_utils::initialize_client();
-                crate::api::test_utils::assert_client_test(async { $apply }).await;
-            }
-             */
 }

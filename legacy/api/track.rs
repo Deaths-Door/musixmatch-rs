@@ -15,12 +15,12 @@ where
     ///
     /// * `id` - The Musixmatch Track ID.
     pub async fn track_with_id<'a>(&self, id: impl Into<TrackId<'a>>) -> Option<Track> {
-        let mut parameters = Parameters::default();
-        id.into().add_to_hashmap(&mut parameters);
+        let mut parmeters = parmeters::default();
+        id.into().add_to_hashmap(&mut parmeters);
 
         self.get_request_handler(
             "track.get",
-            &parameters,
+            &parmeters,
             Self::create_map(|value| value),
             &self.error_resolver,
         )
@@ -29,7 +29,7 @@ where
 
     /// Search for track in our database.
     ///
-    /// # Parameters
+    /// # parmeters
     ///
     /// `q_track` : The song title
     /// `q_artist` : The song artist
@@ -73,11 +73,11 @@ where
         L: Datelike,
         U: Datelike,
     {
-        let mut parameters = Parameters::default();
+        let mut parmeters = parmeters::default();
 
         self.get_request_handler(
             "track.search",
-            &parameters,
+            &parmeters,
             Self::create_map(|value| value),
             &self.error_resolver,
         )

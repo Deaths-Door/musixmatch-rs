@@ -5,10 +5,14 @@ use api_request_utils::{
     RequestDefaults, RequestError, RequestHandler, RequestInfo, RequestModifiers,
 };
 
+use crate::prelude::Parameters;
+
 /// Represents a client for accessing the MusicMatch API.
 ///
 /// The `MusixAbgleich` struct provides the necessary functionality to interact with the
 /// MusicMatch API, including sending requests and handling errors.
+///
+/// **Note:** Only the `free-tier` API methods have been implemented
 #[bon::builder]
 pub struct MusixAbgleich<A, F>
 where
@@ -29,12 +33,33 @@ where
     A: AsRef<str> + Send + Sync,
     F: Fn(RequestError<Value>) + Sync + Send,
 {
-    pub(crate) fn create_map<O: DeserializeOwned>(
-        value_mapper: impl FnOnce(&Value) -> &Value + Send + Sync,
-    ) -> impl FnOnce(Value) -> O + Send + Sync {
-        |response: Value| {
-            from_value::<O>(value_mapper(response.get("body").unwrap()).clone()).unwrap()
-        }
+    #[deprecated(note = "try replacing this")]
+    pub(crate) async fn request<'a, T: DeserializeOwned>(
+        &self,
+        endpoint: &str,
+        parameters: &Parameters<'a>,
+        key: &str,
+    ) -> Option<T> {
+        self.get_request_handler(
+            endpoint,
+            parameters,
+            |response: Value| {
+                // TODO: remove unwrap here
+
+                let json = response
+                    .get("message")
+                    .unwrap()
+                    .get("body")
+                    .unwrap()
+                    .get(key)
+                    .unwrap()
+                    .clone();
+
+                from_value::<T>(json).unwrap()
+            },
+            &self.error_resolver,
+        )
+        .await
     }
 }
 

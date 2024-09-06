@@ -19,7 +19,7 @@ chrono = { version = "0.4.38" , default-features = false }
 strum = {version ="0.26.3",features = ["derive"]}
 
 [dev-dependencies]
-dotenv = "0.15.0"
+dotenvy = "0.15.0"
 
 # https://docs.rs/tokio/latest/tokio/attr.test.html
 tokio ={ version = "1.40.0" , features = ["rt","macros"]}
@@ -34,3 +34,4 @@ unreachable_patterns= "forbid"
 trivial_casts= "forbid"
 unsafe_op_in_unsafe_fn= "forbid"
 overflowing_literals= "forbid"
+missing_docs = "deny"

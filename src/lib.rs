@@ -1,11 +1,15 @@
 #![doc = include_str!("../README.md")]
 
-#[cfg_attr(not(test), forbid(unused_mut))]
 mod api;
+
 mod client;
+mod parmeters;
+
+///
 pub mod prelude {
-    use super::{api, client};
+    use super::{api, client, parmeters};
 
     pub use api::*;
     pub use client::*;
+    pub use parmeters::*;
 }
