@@ -6,16 +6,16 @@ use std::{
 use api_request_utils::serde_json::Value;
 
 #[derive(Default)]
-pub(in crate::api) struct Parameters<'a>(std::collections::HashMap<&'a str, Value>);
+pub(in crate::api) struct parmeters<'a>(std::collections::HashMap<&'a str, Value>);
 
-impl<'a> Deref for Parameters<'a> {
+impl<'a> Deref for parmeters<'a> {
     type Target = HashMap<&'a str, Value>;
     fn deref(&self) -> &Self::Target {
         &self.0
     }
 }
 
-impl<'a> DerefMut for Parameters<'a> {
+impl<'a> DerefMut for parmeters<'a> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.0
     }
@@ -54,8 +54,8 @@ macro_rules! create_parameters {
             pub struct $name<T>(T) where T : chrono::Datelike;
 
             impl<T> $name::<T> where T :chrono::Datelike  {
-                pub(in crate::api) fn add_to_hashmap<'l>(self, parameters: &mut crate::api::Parameters<'l>) {
-                  parameters.insert($key, Value::from(self));
+                pub(in crate::api) fn add_to_hashmap<'l>(self, parmeters: &mut crate::api::parmeters<'l>) {
+                  parmeters.insert($key, Value::from(self));
                 }
             }
 
@@ -72,8 +72,8 @@ macro_rules! create_parameters {
     (hashmap => $($name:ident $(<$($generics:tt),*>)?),* => $key:expr) => {
         $(
             impl$(<$($generics),*>)? $name $(<$($generics),*>)? {
-                pub(in crate::api) fn add_to_hashmap<'l>(self, parameters: &mut crate::api::Parameters<'l>) {
-                  parameters.insert($key, Value::from(self));
+                pub(in crate::api) fn add_to_hashmap<'l>(self, parmeters: &mut crate::api::parmeters<'l>) {
+                  parmeters.insert($key, Value::from(self));
                 }
             }
         )*
@@ -134,13 +134,13 @@ pub enum TrackId<'a> {
 }
 
 impl TrackId<'_> {
-    pub(in crate::api) fn add_to_hashmap<'a>(self, parameters: &mut Parameters<'a>) {
+    pub(in crate::api) fn add_to_hashmap<'a>(self, parmeters: &mut parmeters<'a>) {
         match self {
             TrackId::Common(id) => {
-                parameters.0.insert("commontrack_id", Value::from(id));
+                parmeters.0.insert("commontrack_id", Value::from(id));
             }
             TrackId::Isrc(id) => {
-                parameters.0.insert("track_isrc", Value::from(id));
+                parmeters.0.insert("track_isrc", Value::from(id));
             }
         };
     }

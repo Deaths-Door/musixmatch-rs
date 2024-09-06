@@ -25,14 +25,6 @@ pub enum SubtitleFormat {
     Stledu,
 }
 
-#[derive(Clone, PartialEq, PartialOrd, Eq, Ord, Debug, Hash, Display)]
-pub enum SortBy {
-    #[strum(serialize = "asc")]
-    Ascending,
-    #[strum(serialize = "desc")]
-    Desecending,
-}
-
 impl From<Chart> for Value {
     fn from(format: Chart) -> Self {
         Value::from(format.to_string())

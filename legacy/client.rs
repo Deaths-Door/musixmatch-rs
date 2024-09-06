@@ -1,73 +1,70 @@
 use std::{borrow::Cow, collections::HashMap};
 
 use api_request_utils::{
-    RequestInfo,
-    RequestModifiers,
-    RequestDefaults,
-    RequestHandler,
-    RequestError,
-    reqwest::{
-        Client,
-        RequestBuilder,
-    },
-    serde_json::{
-        Value,
-        from_value
-    },
-    serde::de::DeserializeOwned
+    reqwest::{Client, RequestBuilder},
+    serde::de::DeserializeOwned,
+    serde_json::{from_value, Value},
+    RequestDefaults, RequestError, RequestHandler, RequestInfo, RequestModifiers,
 };
 
 use crate::{
-    SubtitleFormat, 
-    Chart,
-    SortBy,
-
-    Artist,
-    Track,
-    Lyrics,
-    LyricMood,
-    Snippet,
-    Genre,
-    Subtitle,
-    Album,
-
-    TrackSearchQuery
+    Album, Artist, Chart, Genre, LyricMood, Lyrics, Snippet, SortBy, Subtitle, SubtitleFormat,
+    Track, TrackSearchQuery,
 };
 
 /// Represents a client for accessing the MusicMatch API.
 ///
 /// The `MusixAbgleich` struct provides the necessary functionality to interact with the
 /// MusicMatch API, including sending requests and handling errors.
-pub struct MusixAbgleich<'a, F> where F : Fn(RequestError<Value>) + Sync + Send {
-    client : Client,
-    api_key: Cow<'a, str>, 
-    error_resolver : F //&'a (dyn Fn(RequestError<Value>) + Sync + Send)
+pub struct MusixAbgleich<'a, F>
+where
+    F: Fn(RequestError<Value>) + Sync + Send,
+{
+    client: Client,
+    api_key: Cow<'a, str>,
+    error_resolver: F, //&'a (dyn Fn(RequestError<Value>) + Sync + Send)
 }
 
-impl<'a, F> RequestInfo for MusixAbgleich<'a, F> where F : Fn(RequestError<Value>) + Sync + Send  {
-    const BASE_URL : &'static str = "https://api.musixmatch.com/ws/1.1";
-    
+impl<'a, F> RequestInfo for MusixAbgleich<'a, F>
+where
+    F: Fn(RequestError<Value>) + Sync + Send,
+{
+    const BASE_URL: &'static str = "https://api.musixmatch.com/ws/1.1";
+
     fn client(&self) -> &Client {
         &self.client
     }
 }
 
-impl<'a, F> RequestModifiers for MusixAbgleich<'a, F> where F : Fn(RequestError<Value>) + Sync + Send {}
+impl<'a, F> RequestModifiers for MusixAbgleich<'a, F> where F: Fn(RequestError<Value>) + Sync + Send {}
 
-impl<'a, F> RequestDefaults for MusixAbgleich<'a, F> where F : Fn(RequestError<Value>) + Sync + Send { 
-    fn default_parameters(&self,request_builder: RequestBuilder) -> RequestBuilder {
+impl<'a, F> RequestDefaults for MusixAbgleich<'a, F>
+where
+    F: Fn(RequestError<Value>) + Sync + Send,
+{
+    fn default_parameters(&self, request_builder: RequestBuilder) -> RequestBuilder {
         request_builder.query(&[("apikey", &self.api_key)])
     }
 }
 
-impl<'a, T,O,E,F> RequestHandler<T,O,E> for MusixAbgleich<'a, F> where F : Fn(RequestError<Value>) + Sync + Send  ,T : DeserializeOwned,O : DeserializeOwned,E : DeserializeOwned {}
+impl<'a, T, O, E, F> RequestHandler<T, O, E> for MusixAbgleich<'a, F>
+where
+    F: Fn(RequestError<Value>) + Sync + Send,
+    T: DeserializeOwned,
+    O: DeserializeOwned,
+    E: DeserializeOwned,
+{
+}
 
-/// At this moment these endpoints are not implemented 
-/// * catalogue.dump.get 
-/// * work.post 
-/// * work.validity.post 
-/// * track.richsync 
-impl<'a, F> MusixAbgleich<'a, F> where F : Fn(RequestError<Value>) + Sync + Send {
+/// At this moment these endpoints are not implemented
+/// * catalogue.dump.get
+/// * work.post
+/// * work.validity.post
+/// * track.richsync
+impl<'a, F> MusixAbgleich<'a, F>
+where
+    F: Fn(RequestError<Value>) + Sync + Send,
+{
     /// Constructs a new instance of the MusixAbgleich type.
     ///
     /// This function creates a new MusixAbgleich instance with the provided API key and error resolver.
@@ -77,16 +74,20 @@ impl<'a, F> MusixAbgleich<'a, F> where F : Fn(RequestError<Value>) + Sync + Send
     ///
     /// * `api_key` - A reference to a string representing the API key used for authentication.
     /// * `error_resolver` - This is responsible for handling errors that occur during API requests.
-    pub fn new(api_key : impl Into<Cow<'a, str>>,error_resolver : F) -> Self {
+    pub fn new(api_key: impl Into<Cow<'a, str>>, error_resolver: F) -> Self {
         MusixAbgleich {
-            client : Client::new(),
-            api_key : api_key.into(),
-            error_resolver
-        }//: Box::new(error_resolver)}
+            client: Client::new(),
+            api_key: api_key.into(),
+            error_resolver,
+        } //: Box::new(error_resolver)}
     }
 
-    fn create_map<O : DeserializeOwned>(value_mapper : impl FnOnce(&Value) -> &Value + Send + Sync) -> impl FnOnce(Value) -> O + Send + Sync  {
-        |response : Value| from_value::<O>(value_mapper(response.get("body").unwrap()).clone()).unwrap()
+    fn create_map<O: DeserializeOwned>(
+        value_mapper: impl FnOnce(&Value) -> &Value + Send + Sync,
+    ) -> impl FnOnce(Value) -> O + Send + Sync {
+        |response: Value| {
+            from_value::<O>(value_mapper(response.get("body").unwrap()).clone()).unwrap()
+        }
     }
 
     /// Retrieves the top artists by country.
@@ -96,15 +97,24 @@ impl<'a, F> MusixAbgleich<'a, F> where F : Fn(RequestError<Value>) + Sync + Send
     /// * `country` - A valid country code (default: "US").
     /// * `page` - The page number for paginated results.
     /// * `page_size` - The page size for paginated results. Range is 1 to 100.
-    pub async fn top_artists_by_country(&self,country : Option<&str>,page : Option<u16>,page_size : Option<u8>) -> Option<Vec<Artist>> {
-        let parameters = HashMap::from(
-            [
-                ("country",Value::from(country)),
-                ("page",Value::from(page)),
-                ("page_size",Value::from(page_size))
-            ]
-        ); 
-        self.get_request_handler("chart.artists.get",&parameters,Self::create_map(|value| value),&self.error_resolver).await
+    pub async fn top_artists_by_country(
+        &self,
+        country: Option<&str>,
+        page: Option<u16>,
+        page_size: Option<u8>,
+    ) -> Option<Vec<Artist>> {
+        let parmeters = HashMap::from([
+            ("country", Value::from(country)),
+            ("page", Value::from(page)),
+            ("page_size", Value::from(page_size)),
+        ]);
+        self.get_request_handler(
+            "chart.artists.get",
+            &parmeters,
+            Self::create_map(|value| value),
+            &self.error_resolver,
+        )
+        .await
     }
 
     /// Retrieves the top tracks by country.
@@ -117,17 +127,28 @@ impl<'a, F> MusixAbgleich<'a, F> where F : Fn(RequestError<Value>) + Sync + Send
     /// * `has_lyrics` - When set, filter only contents with lyrics.
     /// * `page` - The page number for paginated results.
     /// * `page_size` - The page size for paginated results. Range is 1 to 100.
-    pub async fn top_tracks_by_country(&self,country : Option<&str>,chart_name : Option<Chart>,has_lyrics : Option<bool>,page : Option<u16>,page_size : Option<u8>) -> Option<Vec<Track>> {
-        let parameters = HashMap::from(
-            [
-                ("country",Value::from(country)),
-                ("chart_name",Value::from(chart_name)),
-                ("f_has_lyrics",Value::from(has_lyrics)),
-                ("page",Value::from(page)),
-                ("page_size",Value::from(page_size))
-            ]
-        ); 
-        self.get_request_handler("chart.tracks.get",&parameters,Self::create_map(|value| value),&self.error_resolver).await
+    pub async fn top_tracks_by_country(
+        &self,
+        country: Option<&str>,
+        chart_name: Option<Chart>,
+        has_lyrics: Option<bool>,
+        page: Option<u16>,
+        page_size: Option<u8>,
+    ) -> Option<Vec<Track>> {
+        let parmeters = HashMap::from([
+            ("country", Value::from(country)),
+            ("chart_name", Value::from(chart_name)),
+            ("f_has_lyrics", Value::from(has_lyrics)),
+            ("page", Value::from(page)),
+            ("page_size", Value::from(page_size)),
+        ]);
+        self.get_request_handler(
+            "chart.tracks.get",
+            &parmeters,
+            Self::create_map(|value| value),
+            &self.error_resolver,
+        )
+        .await
     }
 
     /// Match a song against the Musixmatch database.
@@ -135,20 +156,29 @@ impl<'a, F> MusixAbgleich<'a, F> where F : Fn(RequestError<Value>) + Sync + Send
     /// In some cases, you may already have some information about the track title, artist name, album, etc.
     /// This method performs the matching process for you in a single call, taking care of the details and providing instant results.
     ///
-    /// # Parameters
+    /// # parmeters
     ///
     /// - `title`: Optional. The song title.
     /// - `artist`: Optional. The song artist.
     /// - `album`: Optional. The song album.
-    pub async fn track(&self,title : Option<&str>,artist : Option<&str>,album : Option<&str>) -> Option<Track> {
-        let parameters = HashMap::from(
-            [
-                ("q_title",Value::from(title)),
-                ("q_artist",Value::from(artist)),
-                ("q_album",Value::from(album))
-            ]
-        ); 
-        self.get_request_handler("matcher.track.get",&parameters,Self::create_map(|value| value),&self.error_resolver).await
+    pub async fn track(
+        &self,
+        title: Option<&str>,
+        artist: Option<&str>,
+        album: Option<&str>,
+    ) -> Option<Track> {
+        let parmeters = HashMap::from([
+            ("q_title", Value::from(title)),
+            ("q_artist", Value::from(artist)),
+            ("q_album", Value::from(album)),
+        ]);
+        self.get_request_handler(
+            "matcher.track.get",
+            &parmeters,
+            Self::create_map(|value| value),
+            &self.error_resolver,
+        )
+        .await
     }
 
     /// Get track information by Musixmatch commontrack_id.
@@ -157,8 +187,14 @@ impl<'a, F> MusixAbgleich<'a, F> where F : Fn(RequestError<Value>) + Sync + Send
     ///
     /// * `id` - The Musixmatch commontrack_id.
     pub async fn track_with_commontrack_id(&self, id: u32) -> Option<Track> {
-        let parameters = HashMap::from( [ ("commontrack_id", Value::from(id)) ] );
-        self.get_request_handler("track.get",&parameters,Self::create_map(|value| value),&self.error_resolver).await
+        let parmeters = HashMap::from([("commontrack_id", Value::from(id))]);
+        self.get_request_handler(
+            "track.get",
+            &parmeters,
+            Self::create_map(|value| value),
+            &self.error_resolver,
+        )
+        .await
     }
 
     /// Get track information by ISRC identifier.
@@ -167,8 +203,14 @@ impl<'a, F> MusixAbgleich<'a, F> where F : Fn(RequestError<Value>) + Sync + Send
     ///
     /// * `isrc` - A valid ISRC identifier.
     pub async fn track_with_track_isrc(&self, isrc: &str) -> Option<Track> {
-        let parameters = HashMap::from([("track_isrc", Value::from(isrc))]);
-        self.get_request_handler("track.get",&parameters,Self::create_map(|value| value),&self.error_resolver).await
+        let parmeters = HashMap::from([("track_isrc", Value::from(isrc))]);
+        self.get_request_handler(
+            "track.get",
+            &parmeters,
+            Self::create_map(|value| value),
+            &self.error_resolver,
+        )
+        .await
     }
 
     /// Get the lyrics for a track based on its ISRC.
@@ -176,31 +218,40 @@ impl<'a, F> MusixAbgleich<'a, F> where F : Fn(RequestError<Value>) + Sync + Send
     /// If you have the ISRC (International Standard Recording Code) of a track in your catalogue,
     /// you can use this method to retrieve the lyrics associated with that track.
     ///
-    /// # Parameters
+    /// # parmeters
     ///
     /// - `isrc`: The ISRC identifier of the track.
-    pub async fn track_lyrics_with_track_isrc(&self,isrc: &str) -> Option<Lyrics> {
-        let parameters = HashMap::from([("track_isrc",Value::from(isrc))]);
-        self.get_request_handler("matcher.lyrics.get",&parameters,Self::create_map(|value| value),&self.error_resolver).await
+    pub async fn track_lyrics_with_track_isrc(&self, isrc: &str) -> Option<Lyrics> {
+        let parmeters = HashMap::from([("track_isrc", Value::from(isrc))]);
+        self.get_request_handler(
+            "matcher.lyrics.get",
+            &parmeters,
+            Self::create_map(|value| value),
+            &self.error_resolver,
+        )
+        .await
     }
-
 
     /// Get the lyrics for a track based on its title and artist.
     ///
     /// Use this method to retrieve the lyrics of a track based on its title and artist.
     ///
-    /// # Parameters
+    /// # parmeters
     ///
     /// - `title`: Optional. The song title.
     /// - `artist`: Optional. The song artist.
-    pub async fn track_lyrics(&self,title : Option<&str>,artist : Option<&str>) -> Option<Lyrics> {
-        let parameters = HashMap::from(
-            [
-                ("q_title",Value::from(title)),
-                ("q_artist",Value::from(artist)),
-            ]
-        ); 
-        self.get_request_handler("matcher.lyrics.get",&parameters,Self::create_map(|value| value),&self.error_resolver).await
+    pub async fn track_lyrics(&self, title: Option<&str>, artist: Option<&str>) -> Option<Lyrics> {
+        let parmeters = HashMap::from([
+            ("q_title", Value::from(title)),
+            ("q_artist", Value::from(artist)),
+        ]);
+        self.get_request_handler(
+            "matcher.lyrics.get",
+            &parmeters,
+            Self::create_map(|value| value),
+            &self.error_resolver,
+        )
+        .await
     }
 
     /// Get the lyrics of a track by Musixmatch commontrack_id.
@@ -209,8 +260,14 @@ impl<'a, F> MusixAbgleich<'a, F> where F : Fn(RequestError<Value>) + Sync + Send
     ///
     /// * `id` - The Musixmatch commontrack_id.
     pub async fn track_lyrics_with_commontrack_id(&self, id: &str) -> Option<Lyrics> {
-        let parameters = HashMap::from([("commontrack_id", Value::from(id))]);
-        self.get_request_handler("track.lyrics.get",&parameters,Self::create_map(|value| value),&self.error_resolver).await
+        let parmeters = HashMap::from([("commontrack_id", Value::from(id))]);
+        self.get_request_handler(
+            "track.lyrics.get",
+            &parmeters,
+            Self::create_map(|value| value),
+            &self.error_resolver,
+        )
+        .await
     }
 
     /// Get the lyrics of a track by Musixmatch track_id.
@@ -219,8 +276,14 @@ impl<'a, F> MusixAbgleich<'a, F> where F : Fn(RequestError<Value>) + Sync + Send
     ///
     /// * `id` - The Musixmatch track_id.
     pub async fn track_lyrics_with_track_id(&self, id: &str) -> Option<Lyrics> {
-        let parameters = HashMap::from([("track_id", Value::from(id))]);
-        self.get_request_handler("track.lyrics.get",&parameters,Self::create_map(|value| value),&self.error_resolver).await
+        let parmeters = HashMap::from([("track_id", Value::from(id))]);
+        self.get_request_handler(
+            "track.lyrics.get",
+            &parmeters,
+            Self::create_map(|value| value),
+            &self.error_resolver,
+        )
+        .await
     }
 
     /// Get a translated lyrics for a given language
@@ -229,16 +292,24 @@ impl<'a, F> MusixAbgleich<'a, F> where F : Fn(RequestError<Value>) + Sync + Send
     /// * `commontrack_id` : The Musixmatch commontrack id
     /// * `selected_language` : The language of the translated lyrics (ISO 639-1)  
     /// * `min_completed` : Teal from 0 to 1. If present, only the tracks with a translation ratio over this specific value, for a given language, are returned Set it to 1 for completed translation only, to 0.7 for a mimimum of 70% complete translation.
-    pub async fn track_lyrics_translations_with_commontrack_id(&self, id: &str,min_completed : Option<f32> /*percent*/,selected_language : Option<&str>/* (ISO 639-1) */) -> Option<Lyrics> {
-        let parameters = HashMap::from(
-            [
-                ("commontrack_id", Value::from(id)),
-                ("min_completed", Value::from(min_completed)),
-                ("selected_language", Value::from(selected_language)),
-
-            ]
-        );
-        self.get_request_handler("track.lyrics.translation.get",&parameters,Self::create_map(|value| value),&self.error_resolver).await
+    pub async fn track_lyrics_translations_with_commontrack_id(
+        &self,
+        id: &str,
+        min_completed: Option<f32>,      /*percent*/
+        selected_language: Option<&str>, /* (ISO 639-1) */
+    ) -> Option<Lyrics> {
+        let parmeters = HashMap::from([
+            ("commontrack_id", Value::from(id)),
+            ("min_completed", Value::from(min_completed)),
+            ("selected_language", Value::from(selected_language)),
+        ]);
+        self.get_request_handler(
+            "track.lyrics.translation.get",
+            &parmeters,
+            Self::create_map(|value| value),
+            &self.error_resolver,
+        )
+        .await
     }
 
     /// Get a translated lyrics for a given language
@@ -247,16 +318,24 @@ impl<'a, F> MusixAbgleich<'a, F> where F : Fn(RequestError<Value>) + Sync + Send
     /// * `track_id` : The Musixmatch track id
     /// * `selected_language` : The language of the translated lyrics (ISO 639-1)  
     /// * `min_completed` : Teal from 0 to 1. If present, only the tracks with a translation ratio over this specific value, for a given language, are returned Set it to 1 for completed translation only, to 0.7 for a mimimum of 70% complete translation.
-    pub async fn track_lyrics_translations_with_track_id(&self, id: &str,min_completed : Option<f32> /*percent*/,selected_language : Option<&str>/* (ISO 639-1) */) -> Option<Lyrics> {
-        let parameters = HashMap::from(
-            [
-                ("track_id", Value::from(id)),
-                ("min_completed", Value::from(min_completed)),
-                ("selected_language", Value::from(selected_language)),
-
-            ]
-        );
-        self.get_request_handler("track.lyrics.translation.get",&parameters,Self::create_map(|value| value),&self.error_resolver).await
+    pub async fn track_lyrics_translations_with_track_id(
+        &self,
+        id: &str,
+        min_completed: Option<f32>,      /*percent*/
+        selected_language: Option<&str>, /* (ISO 639-1) */
+    ) -> Option<Lyrics> {
+        let parmeters = HashMap::from([
+            ("track_id", Value::from(id)),
+            ("min_completed", Value::from(min_completed)),
+            ("selected_language", Value::from(selected_language)),
+        ]);
+        self.get_request_handler(
+            "track.lyrics.translation.get",
+            &parmeters,
+            Self::create_map(|value| value),
+            &self.error_resolver,
+        )
+        .await
     }
 
     /// Get a translated lyrics for a given language
@@ -265,16 +344,24 @@ impl<'a, F> MusixAbgleich<'a, F> where F : Fn(RequestError<Value>) + Sync + Send
     /// * `track_isrc` : A valid ISRC identifier
     /// * `selected_language` : The language of the translated lyrics (ISO 639-1)  
     /// * `min_completed` : Teal from 0 to 1. If present, only the tracks with a translation ratio over this specific value, for a given language, are returned Set it to 1 for completed translation only, to 0.7 for a mimimum of 70% complete translation.
-    pub async fn track_lyrics_translations_with_track_irsc(&self, id: &str,min_completed : Option<f32> /*percent*/,selected_language : Option<&str>/* (ISO 639-1) */) -> Option<Lyrics> {
-        let parameters = HashMap::from(
-            [
-                ("track_isrc", Value::from(id)),
-                ("min_completed", Value::from(min_completed)),
-                ("selected_language", Value::from(selected_language)),
-
-            ]
-        );
-        self.get_request_handler("track.lyrics.translation.get",&parameters,Self::create_map(|value| value),&self.error_resolver).await
+    pub async fn track_lyrics_translations_with_track_irsc(
+        &self,
+        id: &str,
+        min_completed: Option<f32>,      /*percent*/
+        selected_language: Option<&str>, /* (ISO 639-1) */
+    ) -> Option<Lyrics> {
+        let parmeters = HashMap::from([
+            ("track_isrc", Value::from(id)),
+            ("min_completed", Value::from(min_completed)),
+            ("selected_language", Value::from(selected_language)),
+        ]);
+        self.get_request_handler(
+            "track.lyrics.translation.get",
+            &parmeters,
+            Self::create_map(|value| value),
+            &self.error_resolver,
+        )
+        .await
     }
 
     /// Get a translated lyrics for a given language
@@ -283,18 +370,25 @@ impl<'a, F> MusixAbgleich<'a, F> where F : Fn(RequestError<Value>) + Sync + Send
     /// * `track_mbid` : The musicbrainz recording id
     /// * `selected_language` : The language of the translated lyrics (ISO 639-1)  
     /// * `min_completed` : Teal from 0 to 1. If present, only the tracks with a translation ratio over this specific value, for a given language, are returned Set it to 1 for completed translation only, to 0.7 for a mimimum of 70% complete translation.
-    pub async fn track_lyrics_translations_with_musixbrainx_id(&self, id: &str,min_completed : Option<f32> /*percent*/,selected_language : Option<&str>/* (ISO 639-1) */) -> Option<Lyrics> {
-        let parameters = HashMap::from(
-            [
-                ("track_mbid", Value::from(id)),
-                ("min_completed", Value::from(min_completed)),
-                ("selected_language", Value::from(selected_language)),
-
-            ]
-        );
-        self.get_request_handler("track.lyrics.translation.get",&parameters,Self::create_map(|value| value),&self.error_resolver).await
+    pub async fn track_lyrics_translations_with_musixbrainx_id(
+        &self,
+        id: &str,
+        min_completed: Option<f32>,      /*percent*/
+        selected_language: Option<&str>, /* (ISO 639-1) */
+    ) -> Option<Lyrics> {
+        let parmeters = HashMap::from([
+            ("track_mbid", Value::from(id)),
+            ("min_completed", Value::from(min_completed)),
+            ("selected_language", Value::from(selected_language)),
+        ]);
+        self.get_request_handler(
+            "track.lyrics.translation.get",
+            &parmeters,
+            Self::create_map(|value| value),
+            &self.error_resolver,
+        )
+        .await
     }
-
 
     /// Get the mood list (and raw value that generated it) of a lyrics by Musixmatch commontrack_id.
     ///
@@ -302,8 +396,14 @@ impl<'a, F> MusixAbgleich<'a, F> where F : Fn(RequestError<Value>) + Sync + Send
     ///
     /// * `id` - The Musixmatch commontrack_id.
     pub async fn track_lyrics_mood_with_commontrack_id(&self, id: &str) -> Option<Lyrics> {
-        let parameters = HashMap::from([("commontrack_id", Value::from(id))]);
-        self.get_request_handler("track.lyrics.mood.get", &parameters,Self::create_map(|value| value),&self.error_resolver).await
+        let parmeters = HashMap::from([("commontrack_id", Value::from(id))]);
+        self.get_request_handler(
+            "track.lyrics.mood.get",
+            &parmeters,
+            Self::create_map(|value| value),
+            &self.error_resolver,
+        )
+        .await
     }
 
     /// Get the mood list (and raw value that generated it) of a lyrics by track ISRC.
@@ -312,10 +412,15 @@ impl<'a, F> MusixAbgleich<'a, F> where F : Fn(RequestError<Value>) + Sync + Send
     ///
     /// * `isrc` - A valid ISRC identifier.
     pub async fn track_lyrics_mood_with_track_isrc(&self, isrc: &str) -> Option<LyricMood> {
-        let parameters = HashMap::from([("track_isrc", Value::from(isrc))]);
-        self.get_request_handler("track.lyrics.mood.get", &parameters,Self::create_map(|value| value),&self.error_resolver).await
+        let parmeters = HashMap::from([("track_isrc", Value::from(isrc))]);
+        self.get_request_handler(
+            "track.lyrics.mood.get",
+            &parmeters,
+            Self::create_map(|value| value),
+            &self.error_resolver,
+        )
+        .await
     }
-
 
     /// Get the snippet for a given track.
     ///
@@ -323,38 +428,55 @@ impl<'a, F> MusixAbgleich<'a, F> where F : Fn(RequestError<Value>) + Sync + Send
     /// It’s usually twenty to a hundred characters long and it’s calculated
     /// by extracting a sequence of words from the lyrics.
     ///
-    /// # Parameters
+    /// # parmeters
     ///
     /// - `track_id`: The musiXmatch track ID.
     pub async fn track_snippet(&self, track_id: u32) -> Option<Snippet> {
-        let parameters = HashMap::from([("track_id", Value::from(track_id))]);
-        self.get_request_handler("track.snippet.get", &parameters,Self::create_map(|value| value),&self.error_resolver).await
+        let parmeters = HashMap::from([("track_id", Value::from(track_id))]);
+        self.get_request_handler(
+            "track.snippet.get",
+            &parmeters,
+            Self::create_map(|value| value),
+            &self.error_resolver,
+        )
+        .await
     }
-
 
     /// Retrieve the subtitle of a track.
     ///
     /// This method returns the subtitle of a track in LRC or DFXP format.
     /// You can specify the desired length of the subtitle and the maximum deviation allowed.
     ///
-    /// # Parameters
+    /// # parmeters
     ///
     /// - `commontrack_id`: The Musixmatch commontrack id.
     /// - `subtitle_length`: Optional. The desired length of the subtitle in seconds.
     /// - `max_deviation`: Optional. The maximum deviation allowed from the desired subtitle length in seconds.
     /// - `format`: Optional. The format of the subtitle (LRC, DFXP, STLEDU). Defaults to LRC.
-    pub async fn track_subtitle(&self,commontrack_id : u32,subtitle_length/*seconds*/ : Option<u16>,max_deviation : Option<u8> /*seconds*/,format : Option<SubtitleFormat>) -> Option<Subtitle> {
-        let parameters = HashMap::from(
-            [
-                ("commontrack_id", Value::from(commontrack_id)),
-                ("f_subtitle_length", Value::from(subtitle_length)),
-                ("f_subtitle_length_max_deviation", Value::from(max_deviation)),
-                ("subtitle_format", Value::from(format))
-            ]
-        );
-        self.get_request_handler("tracks.subtitle.get", &parameters,Self::create_map(|value| value),&self.error_resolver).await
+    pub async fn track_subtitle(
+        &self,
+        commontrack_id: u32,
+        subtitle_length /*seconds*/: Option<u16>,
+        max_deviation: Option<u8>, /*seconds*/
+        format: Option<SubtitleFormat>,
+    ) -> Option<Subtitle> {
+        let parmeters = HashMap::from([
+            ("commontrack_id", Value::from(commontrack_id)),
+            ("f_subtitle_length", Value::from(subtitle_length)),
+            (
+                "f_subtitle_length_max_deviation",
+                Value::from(max_deviation),
+            ),
+            ("subtitle_format", Value::from(format)),
+        ]);
+        self.get_request_handler(
+            "tracks.subtitle.get",
+            &parmeters,
+            Self::create_map(|value| value),
+            &self.error_resolver,
+        )
+        .await
     }
-
 
     /// Get the subtitles for a song given its title, artist, and duration.
     ///
@@ -370,277 +492,419 @@ impl<'a, F> MusixAbgleich<'a, F> where F : Fn(RequestError<Value>) + Sync + Send
     ///    `<img src="http://tracking.musixmatch.com/t1.0/AMa6hJCIEzn1v8RuXW">`
     /// Furthermore, every time a subtitle is present in a page, the `lyrics_copyright` field must also be clearly visible.
     ///
-    /// # Parameters
+    /// # parmeters
     ///
     /// - `title`: The song title.
     /// - `artist`: The song artist.
     /// - `album`: Optional. The song album.
     /// - `subtitle_length`: Optional. Filter by subtitle length in seconds.
     /// - `max_deviation`: Optional. Max deviation for a subtitle length in seconds.
-    pub async fn subtitle(&self,title : Option<&str>,artist : Option<&str>,album : Option<&str>,subtitle_length/*seconds*/ : Option<u16>,max_deviation : Option<u8> /*seconds*/) -> Option<Track> {
-        let parameters = HashMap::from(
-            [
-                ("q_title",Value::from(title)),
-                ("q_artist",Value::from(artist)),
-                ("q_album",Value::from(album)),
-                ("f_subtitle_length", Value::from(subtitle_length)),
-                ("f_subtitle_length_max_deviation", Value::from(max_deviation)),
-            ]
-        ); 
+    pub async fn subtitle(
+        &self,
+        title: Option<&str>,
+        artist: Option<&str>,
+        album: Option<&str>,
+        subtitle_length /*seconds*/: Option<u16>,
+        max_deviation: Option<u8>, /*seconds*/
+    ) -> Option<Track> {
+        let parmeters = HashMap::from([
+            ("q_title", Value::from(title)),
+            ("q_artist", Value::from(artist)),
+            ("q_album", Value::from(album)),
+            ("f_subtitle_length", Value::from(subtitle_length)),
+            (
+                "f_subtitle_length_max_deviation",
+                Value::from(max_deviation),
+            ),
+        ]);
 
-        self.get_request_handler("matcher.subtitle.get", &parameters,Self::create_map(|value| value),&self.error_resolver).await
+        self.get_request_handler(
+            "matcher.subtitle.get",
+            &parmeters,
+            Self::create_map(|value| value),
+            &self.error_resolver,
+        )
+        .await
     }
-    
+
     /// Get a translated subtitle for a given language.
     ///
-    /// # Parameters
+    /// # parmeters
     /// `selected_language`: The language of the translated lyrics (ISO 639-1).
     /// `min_completed`: A value between 0 and 1. If present, only the tracks with a translation ratio over this specific value, for a given language, are returned. Set it to 1 for completed translation only, or to 0.7 for a minimum of 70% complete translation.
     /// `commontrack_id`: The Musixmatch commontrack ID.
     /// `f_subtitle_length`: The desired length of the subtitle in seconds.
     /// `f_subtitle_length_max_deviation`: The maximum deviation allowed from the f_subtitle_length in seconds.
-    pub async fn track_subtitle_translations_with_commontrack_id(&self, id: &str,min_completed : Option<f32> /*percent*/,selected_language : Option<&str>/* (ISO 639-1) */,subtitle_length/*seconds*/ : Option<u16>,max_deviation : Option<u8> /*seconds*/)-> Option<Subtitle> {
-        let parameters = HashMap::from(
-            [
-                ("commontrack_id", Value::from(id)),
-                ("min_completed", Value::from(min_completed)),
-                ("selected_language", Value::from(selected_language)),
-                ("f_subtitle_length", Value::from(subtitle_length)),
-                ("f_subtitle_length_max_deviation", Value::from(max_deviation)),
-
-            ]
-        );
-        self.get_request_handler("track.subtitle.translation.get", &parameters,Self::create_map(|value| value.get("subtitle_translated").unwrap()),&self.error_resolver).await
+    pub async fn track_subtitle_translations_with_commontrack_id(
+        &self,
+        id: &str,
+        min_completed: Option<f32>,      /*percent*/
+        selected_language: Option<&str>, /* (ISO 639-1) */
+        subtitle_length /*seconds*/: Option<u16>,
+        max_deviation: Option<u8>, /*seconds*/
+    ) -> Option<Subtitle> {
+        let parmeters = HashMap::from([
+            ("commontrack_id", Value::from(id)),
+            ("min_completed", Value::from(min_completed)),
+            ("selected_language", Value::from(selected_language)),
+            ("f_subtitle_length", Value::from(subtitle_length)),
+            (
+                "f_subtitle_length_max_deviation",
+                Value::from(max_deviation),
+            ),
+        ]);
+        self.get_request_handler(
+            "track.subtitle.translation.get",
+            &parmeters,
+            Self::create_map(|value| value.get("subtitle_translated").unwrap()),
+            &self.error_resolver,
+        )
+        .await
     }
 
     /// Get a translated subtitle for a given language.
     ///
-    /// # Parameters
+    /// # parmeters
     /// `selected_language`: The language of the translated lyrics (ISO 639-1).
     /// `min_completed`: A value between 0 and 1. If present, only the tracks with a translation ratio over this specific value, for a given language, are returned. Set it to 1 for completed translation only, or to 0.7 for a minimum of 70% complete translation.
     /// `track_isrc`: A valid ISRC identifier.
     /// `f_subtitle_length`: The desired length of the subtitle in seconds.
     /// `f_subtitle_length_max_deviation`: The maximum deviation allowed from the f_subtitle_length in seconds.
-    pub async fn track_subtitle_translations_with_track_isrc(&self, id: &str,min_completed : Option<f32> /*percent*/,selected_language : Option<&str>/* (ISO 639-1) */,subtitle_length/*seconds*/ : Option<u16>,max_deviation : Option<u8> /*seconds*/) -> Option<Subtitle> {
-        let parameters = HashMap::from(
-            [
-                ("track_isrc", Value::from(id)),
-                ("min_completed", Value::from(min_completed)),
-                ("selected_language", Value::from(selected_language)),
-                ("f_subtitle_length", Value::from(subtitle_length)),
-                ("f_subtitle_length_max_deviation", Value::from(max_deviation)),
-            ]
-        );
-        self.get_request_handler("track.subtitle.translation.get", &parameters,Self::create_map(|value| value.get("subtitle_translated").unwrap()),&self.error_resolver).await
+    pub async fn track_subtitle_translations_with_track_isrc(
+        &self,
+        id: &str,
+        min_completed: Option<f32>,      /*percent*/
+        selected_language: Option<&str>, /* (ISO 639-1) */
+        subtitle_length /*seconds*/: Option<u16>,
+        max_deviation: Option<u8>, /*seconds*/
+    ) -> Option<Subtitle> {
+        let parmeters = HashMap::from([
+            ("track_isrc", Value::from(id)),
+            ("min_completed", Value::from(min_completed)),
+            ("selected_language", Value::from(selected_language)),
+            ("f_subtitle_length", Value::from(subtitle_length)),
+            (
+                "f_subtitle_length_max_deviation",
+                Value::from(max_deviation),
+            ),
+        ]);
+        self.get_request_handler(
+            "track.subtitle.translation.get",
+            &parmeters,
+            Self::create_map(|value| value.get("subtitle_translated").unwrap()),
+            &self.error_resolver,
+        )
+        .await
     }
 
     /// Search for artists in our database.
-    /// 
-    /// # Parameters
-    /// 
+    ///
+    /// # parmeters
+    ///
     /// `q_artist` : The song artist
     /// `f_artist_id` : When set, filter by this artist id
     /// `f_artist_mbid` : When set, filter by this artist musicbrainz id
     /// `page` : Define the page number for paginated results
     /// `page_size` :Define the page size for paginated results. Range is 1 to 100.
-    pub async fn search_artist(&self, artist_song: Option<&str>, artist_id: Option<u32>, artist_mbid: Option<&str>, page: Option<u32>, page_size: Option<u8>) -> Option<Artist> {
-        let parameters = HashMap::from(
-            [
-                ("q_artist", Value::from(artist_song)),
-                ("f_artist_id", Value::from(artist_id)),
-                ("f_artist_mbid", Value::from(artist_mbid)),
-                ("page", Value::from(page)),
-                ("page_size", Value::from(page_size))
-            ]
-        );
-        self.get_request_handler("artist.search", &parameters,Self::create_map(|value| value),&self.error_resolver).await
+    pub async fn search_artist(
+        &self,
+        artist_song: Option<&str>,
+        artist_id: Option<u32>,
+        artist_mbid: Option<&str>,
+        page: Option<u32>,
+        page_size: Option<u8>,
+    ) -> Option<Artist> {
+        let parmeters = HashMap::from([
+            ("q_artist", Value::from(artist_song)),
+            ("f_artist_id", Value::from(artist_id)),
+            ("f_artist_mbid", Value::from(artist_mbid)),
+            ("page", Value::from(page)),
+            ("page_size", Value::from(page_size)),
+        ]);
+        self.get_request_handler(
+            "artist.search",
+            &parmeters,
+            Self::create_map(|value| value),
+            &self.error_resolver,
+        )
+        .await
     }
-    
 
     /// Get the artist data from the Musixmatch database using the Musixmatch artist ID.
     ///
-    /// # Parameters
+    /// # parmeters
     ///
     /// - `id`: The Musixmatch artist ID
-    pub async fn artist_with_musixmatch_id(&self,id : u32) -> Option<Artist> {
-        let parameters = HashMap::from([("artist_id",Value::from(id))]);
-        self.get_request_handler("artist.get", &parameters,Self::create_map(|value| value),&self.error_resolver).await
+    pub async fn artist_with_musixmatch_id(&self, id: u32) -> Option<Artist> {
+        let parmeters = HashMap::from([("artist_id", Value::from(id))]);
+        self.get_request_handler(
+            "artist.get",
+            &parmeters,
+            Self::create_map(|value| value),
+            &self.error_resolver,
+        )
+        .await
     }
 
     /// Get the artist data from the Musixmatch database using the Musicbrainz artist ID.
     ///
-    /// # Parameters
+    /// # parmeters
     ///
     /// - `id`: The Musicbrainz artist ID.
-    pub async fn artist_with_musixbrainz_id(&self,id : u32) -> Option<Artist> {
-        let parameters = HashMap::from([("artist_mbid",Value::from(id))]);
-        self.get_request_handler("artist.get", &parameters,Self::create_map(|value| value),&self.error_resolver).await
+    pub async fn artist_with_musixbrainz_id(&self, id: u32) -> Option<Artist> {
+        let parmeters = HashMap::from([("artist_mbid", Value::from(id))]);
+        self.get_request_handler(
+            "artist.get",
+            &parmeters,
+            Self::create_map(|value| value),
+            &self.error_resolver,
+        )
+        .await
     }
 
     /// Get the album discography of an artist
-    /// 
-    /// # Parameters
-    /// 
+    ///
+    /// # parmeters
+    ///
     /// artist_id : Musixmatch artist id
     /// g_album_name : Group by Album Name
     /// s_release_date : Sort by release date (asc|desc)
     /// page : Define the page number for paginated results
     /// page_size : Define the page size for paginated results. Range is 1 to 100.
-    pub async fn artist_relating_albums_with_id(&self,id:u32,album_name: Option<bool>,release_date_sort: Option<SortBy>, page: Option<u32>, page_size: Option<u8>) -> Option<Vec<Album>> {
-        let parameters = HashMap::from([
+    pub async fn artist_relating_albums_with_id(
+        &self,
+        id: u32,
+        album_name: Option<bool>,
+        release_date_sort: Option<SortBy>,
+        page: Option<u32>,
+        page_size: Option<u8>,
+    ) -> Option<Vec<Album>> {
+        let parmeters = HashMap::from([
             ("artist_id", Value::from(id)),
             ("g_album_name", Value::from(album_name)),
             ("s_release_date", Value::from(release_date_sort)),
             ("page", Value::from(page)),
             ("page_size", Value::from(page_size)),
         ]);
-    
-        self.get_request_handler("artist.albums.get", &parameters,Self::create_map(|value| value),&self.error_resolver).await
+
+        self.get_request_handler(
+            "artist.albums.get",
+            &parmeters,
+            Self::create_map(|value| value),
+            &self.error_resolver,
+        )
+        .await
     }
 
     /// Get the album discography of an artist
-    /// 
-    /// # Parameters
-    /// 
+    ///
+    /// # parmeters
+    ///
     /// artist_mbid : Musicbrainz artist id
     /// g_album_name : Group by Album Name
     /// s_release_date : Sort by release date (asc|desc)
     /// page : Define the page number for paginated results
-    /// page_size : Define the page size for paginated results. Range is 1 to 100. 
-    pub async fn artist_relating_albums_with_musixbrainz_id(&self,id:u32,album_name: Option<bool>,release_date_sort: Option<SortBy>, page: Option<u32>, page_size: Option<u8>) -> Option<Vec<Album>> {
-        let parameters = HashMap::from([
+    /// page_size : Define the page size for paginated results. Range is 1 to 100.
+    pub async fn artist_relating_albums_with_musixbrainz_id(
+        &self,
+        id: u32,
+        album_name: Option<bool>,
+        release_date_sort: Option<SortBy>,
+        page: Option<u32>,
+        page_size: Option<u8>,
+    ) -> Option<Vec<Album>> {
+        let parmeters = HashMap::from([
             ("artist_mbid", Value::from(id)),
             ("g_album_name", Value::from(album_name)),
             ("s_release_date", Value::from(release_date_sort)),
             ("page", Value::from(page)),
             ("page_size", Value::from(page_size)),
         ]);
-    
-        self.get_request_handler("artist.albums.get", &parameters,Self::create_map(|value| value),&self.error_resolver).await
+
+        self.get_request_handler(
+            "artist.albums.get",
+            &parmeters,
+            Self::create_map(|value| value),
+            &self.error_resolver,
+        )
+        .await
     }
 
- 
-
     /// Get a list of artists somehow related to a given one.
-    /// 
-    /// # Parameters
-    /// 
+    ///
+    /// # parmeters
+    ///
     /// `artist_id` : The musiXmatch artist id
     /// `page` : Define the page number for paginated results
     /// `page_size` : Define the page size for paginated results. Range is 1 to 100
-    pub async fn artist_relating_artist_with_id(&self,id:u32,page: Option<u32>, page_size: Option<u8>) -> Option<Vec<Artist>> {
-        let parameters = HashMap::from([
+    pub async fn artist_relating_artist_with_id(
+        &self,
+        id: u32,
+        page: Option<u32>,
+        page_size: Option<u8>,
+    ) -> Option<Vec<Artist>> {
+        let parmeters = HashMap::from([
             ("artist_id", Value::from(id)),
             ("page", Value::from(page)),
             ("page_size", Value::from(page_size)),
         ]);
-    
-        self.get_request_handler("artist.related.get", &parameters,Self::create_map(|value| value),&self.error_resolver).await
+
+        self.get_request_handler(
+            "artist.related.get",
+            &parmeters,
+            Self::create_map(|value| value),
+            &self.error_resolver,
+        )
+        .await
     }
 
     /// Get a list of artists somehow related to a given one.
-    /// 
-    /// # Parameters
-    /// 
+    ///
+    /// # parmeters
+    ///
     /// `artist_mbid` : The musicbrainz artist id
     /// `page` : Define the page number for paginated results
     /// `page_size` : Define the page size for paginated results. Range is 1 to 100
-    pub async fn artist_relating_artist_with_musixbrainz_id(&self,id:u32,page: Option<u32>, page_size: Option<u8>) -> Option<Vec<Artist>> {
-        let parameters = HashMap::from([
+    pub async fn artist_relating_artist_with_musixbrainz_id(
+        &self,
+        id: u32,
+        page: Option<u32>,
+        page_size: Option<u8>,
+    ) -> Option<Vec<Artist>> {
+        let parmeters = HashMap::from([
             ("artist_mbid", Value::from(id)),
             ("page", Value::from(page)),
             ("page_size", Value::from(page_size)),
         ]);
-    
-        self.get_request_handler("artist.related.get", &parameters,Self::create_map(|value| value),&self.error_resolver).await
-    }
 
- 
+        self.get_request_handler(
+            "artist.related.get",
+            &parmeters,
+            Self::create_map(|value| value),
+            &self.error_resolver,
+        )
+        .await
+    }
 
     /// Get an album from the Musixmatch database.
     ///
     /// Retrieves information about an album including its name, release date, release type,
     /// and cover art.
     ///
-    /// # Parameters
+    /// # parmeters
     ///
     /// - `id`: The Musixmatch album ID.
-    pub async fn album(&self,id : u32) -> Option<Album> {
-        let parameters = HashMap::from([("album_id",Value::from(id))]);
-        self.get_request_handler("album.get", &parameters,Self::create_map(|value| value),&self.error_resolver).await
+    pub async fn album(&self, id: u32) -> Option<Album> {
+        let parmeters = HashMap::from([("album_id", Value::from(id))]);
+        self.get_request_handler(
+            "album.get",
+            &parmeters,
+            Self::create_map(|value| value),
+            &self.error_resolver,
+        )
+        .await
     }
 
     /// This api provides you the list of the songs of an album.
-    /// 
-    /// # Parameters
-    /// 
+    ///
+    /// # parmeters
+    ///
     /// album_id : Musixmatch album id
     /// has_lyrics :When set, filter only contents with lyrics
     /// page : Define the page number for paginated results
     /// page_size : Define the page size for paginated results. Range is 1 to 100.
-    pub async fn album_tracks_with_id(&self,id: u32,has_lyrics: Option<bool>, page: Option<u32>, page_size: Option<u8>) -> Option<Vec<Track>> {
-        let parameters = HashMap::from([
+    pub async fn album_tracks_with_id(
+        &self,
+        id: u32,
+        has_lyrics: Option<bool>,
+        page: Option<u32>,
+        page_size: Option<u8>,
+    ) -> Option<Vec<Track>> {
+        let parmeters = HashMap::from([
             ("album_id", Value::from(id)),
             ("f_has_lyrics", Value::from(has_lyrics)),
             ("page", Value::from(page)),
             ("page_size", Value::from(page_size)),
         ]);
 
-        self.get_request_handler("album.tracks.get", &parameters,Self::create_map(|value| value),&self.error_resolver).await
+        self.get_request_handler(
+            "album.tracks.get",
+            &parmeters,
+            Self::create_map(|value| value),
+            &self.error_resolver,
+        )
+        .await
     }
 
-    
     /// This api provides you the list of the songs of an album.
-    /// 
-    /// # Parameters
-    /// 
+    ///
+    /// # parmeters
+    ///
     /// album_mbid : Musicbrainz album id
     /// has_lyrics :When set, filter only contents with lyrics
     /// page : Define the page number for paginated results
     /// page_size : Define the page size for paginated results. Range is 1 to 100.
-    pub async fn album_tracks_with_musixbrainz_id(&self,id: u32 ,has_lyrics: Option<bool>, page: Option<u32>, page_size: Option<u8>) -> Option<Vec<Track>> {
-        let parameters = HashMap::from([
+    pub async fn album_tracks_with_musixbrainz_id(
+        &self,
+        id: u32,
+        has_lyrics: Option<bool>,
+        page: Option<u32>,
+        page_size: Option<u8>,
+    ) -> Option<Vec<Track>> {
+        let parmeters = HashMap::from([
             ("album_mbid", Value::from(id)),
             ("f_has_lyrics", Value::from(has_lyrics)),
             ("page", Value::from(page)),
             ("page_size", Value::from(page_size)),
         ]);
 
-        self.get_request_handler("album.tracks.get", &parameters,Self::create_map(|value| value),&self.error_resolver).await
+        self.get_request_handler(
+            "album.tracks.get",
+            &parmeters,
+            Self::create_map(|value| value),
+            &self.error_resolver,
+        )
+        .await
     }
-
-
- 
 
     /// Get the list of music genres in the catalogue.
     pub async fn genres(&self) -> Option<Vec<Genre>> {
-        let parameters = HashMap::new();
-        self.get_request_handler("music.genres.get", &parameters,Self::create_map(|value| value),&self.error_resolver).await
+        let parmeters = HashMap::new();
+        self.get_request_handler(
+            "music.genres.get",
+            &parmeters,
+            Self::create_map(|value| value),
+            &self.error_resolver,
+        )
+        .await
     }
 
- 
-
-
     /// Get the base url for the tracking script
-    /// 
+    ///
     /// With this api you’ll be able to get the base url for the tracking script you need to insert in your page to legalize your existent lyrics library.
     ///
     /// Read more here: <https://developer.musixmatch.com/documentation/rights-clearance-on-your-existing-catalog>
     ///
     /// In case you’re fetching the lyrics by the musiXmatch api called track.lyrics.get you don’t need to implement this API call.
-    /// # Parameters
-    /// 
+    /// # parmeters
+    ///
     /// `domain` : Your domain name
-    pub async fn tracking_url(&self,domain : &str) -> Option<String> {
-        let parameters = HashMap::from([("domain",Value::from(domain))]);
-        
-        self.get_request_handler("tracking.url.get", &parameters,Self::create_map(|value| value.get("url").unwrap()),&self.error_resolver).await
+    pub async fn tracking_url(&self, domain: &str) -> Option<String> {
+        let parmeters = HashMap::from([("domain", Value::from(domain))]);
+
+        self.get_request_handler(
+            "tracking.url.get",
+            &parmeters,
+            Self::create_map(|value| value.get("url").unwrap()),
+            &self.error_resolver,
+        )
+        .await
     }
 
     /// Search for track in our database.
-    /// 
-    /// # Parameters
-    /// 
+    ///
+    /// # parmeters
+    ///
     /// `q_track` : The song title
     /// `q_artist` : The song artist
     /// `q_lyrics` : Any word in the lyrics
@@ -658,7 +922,13 @@ impl<'a, F> MusixAbgleich<'a, F> where F : Fn(RequestError<Value>) + Sync + Send
     /// `quorum_factor` : Search only a part of the given query string.Allowed range is (0.1 – 0.9)
     /// `page` : Define the page number for paginated results
     /// `page_size` : Define the page size for paginated results. Range is 1 to 100.
-    pub async fn search_track(&self,query : TrackSearchQuery) -> Option<Track> {
-        self.get_request_handler("track.search", &query.0,Self::create_map(|value| value),&self.error_resolver).await
+    pub async fn search_track(&self, query: TrackSearchQuery) -> Option<Track> {
+        self.get_request_handler(
+            "track.search",
+            &query.0,
+            Self::create_map(|value| value),
+            &self.error_resolver,
+        )
+        .await
     }
 }
